@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python & Django
+*.log
+debug.log
+db.sqlite3
+backend/db.sqlite3
+.env
+backend/.env
+staticfiles/
+media/captured_faces/*
+backend/media/test_*
+project_doc_temp.html
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native & Keys
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro & Bundler
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# OS
+.DS_Store
+*.pem
+
+# TypeScript
+*.tsbuildinfo
