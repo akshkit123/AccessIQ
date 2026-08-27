@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AccessIQ - Smart Campus Identity, Access & Security Management{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- HTML5 Barcode & QR Camera Scanner -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- ZXing Barcode Scanning Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@latest/umd/index.min.js"></script>
+    <!-- JsBarcode Barcode Generator -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+    <style>
+        :root {
+            --bg-primary: #F8FAFC;
+            --bg-surface: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F1F5F9;
+            --border-color: #E2E8F0;
+            --border-focus: #2563EB;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --text-secondary: #475569;
+            --accent-blue: #2563EB;
+            --accent-cyan: #0284C7;
+            --accent-green: #10B981;
+            --accent-red: #EF4444;
+            --accent-yellow: #D97706;
+            --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Typography & Headings */
+        h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+            color: #0F172A !important;
+            font-weight: 700;
+        }
+
+        .text-muted {
+            color: #64748B !important;
+        }
+
+        .text-secondary {
+            color: #475569 !important;
+        }
+
+        /* Top Navigation */
+        .navbar-custom {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+        }
+
+        .brand-badge {
+            background: linear-gradient(135deg, #2563EB, #0284C7);
+            color: #FFFFFF !important;
+            font-weight: 800;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+        }
+
+        .nav-link-custom {
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.38rem 0.65rem;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap !important;
+            flex-shrink: 0;
+        }
+
+        .nav-link-custom:hover {
+            color: #0F172A;
+            background-color: #F1F5F9;
+        }
+
+        .nav-link-custom.active {
+            color: #2563EB !important;
+            background-color: #EFF6FF !important;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1199.98px) {
+            .navbar-collapse {
+                padding-top: 0.75rem;
+                padding-bottom: 0.5rem;
+            }
+            .nav-link-custom {
+                padding: 0.55rem 0.85rem;
+                width: 100%;
+                font-size: 0.92rem;
+            }
+        }
+
+        /* Content Area */
+        .main-wrapper {
+            flex: 1;
+            padding: 1.75rem 1.5rem 3rem 1.5rem;
+        }
+
+        /* Cards & Containers */
+        .card-custom {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.4rem;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.02);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-custom:hover {
+            border-color: #CBD5E1;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        }
+
+        .stat-card {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.25rem 1.4rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.02);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3.5px;
+            background: linear-gradient(90deg, #2563EB, #0284C7);
+        }
+
+        .stat-card.green::after { background: linear-gradient(90deg, #10B981, #059669); }
+        .stat-card.red::after { background: linear-gradient(90deg, #EF4444, #DC2626); }
+        .stat-card.yellow::after { background: linear-gradient(90deg, #F59E0B, #D97706); }
+
+        .stat-title {
+            color: #64748B;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-value {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #0F172A;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-subtext {
+            font-size: 0.8rem;
+            color: #64748B;
+            margin-top: 0.2rem;
+        }
+
+        /* Badges */
+        .badge-granted {
+            background-color: #ECFDF5 !important;
+            color: #047857 !important;
+            border: 1px solid #A7F3D0 !important;
+            font-weight: 700;
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+        }
+
+        .badge-denied {
+            background-color: #FEF2F2 !important;
+            color: #B91C1C !important;
+            border: 1px solid #FECACA !important;
+            font-weight: 700;
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+        }
+
+        .badge-neutral {
+            background-color: #F1F5F9 !important;
+            color: #475569 !important;
+            border: 1px solid #CBD5E1 !important;
+            font-weight: 600;
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+        }
+
+        /* Subtle Badges */
+        .bg-primary-subtle { background-color: #EFF6FF !important; }
+        .text-primary { color: #2563EB !important; }
+        .bg-success-subtle { background-color: #ECFDF5 !important; }
+        .text-success { color: #059669 !important; }
+        .bg-danger-subtle { background-color: #FEF2F2 !important; }
+        .text-danger { color: #DC2626 !important; }
+        .bg-warning-subtle { background-color: #FFFBEB !important; }
+        .text-warning { color: #D97706 !important; }
+        .bg-info-subtle { background-color: #F0F9FF !important; }
+        .text-info { color: #0284C7 !important; }
+        .bg-secondary-subtle { background-color: #F1F5F9 !important; }
+        .text-cyan { color: #0891B2 !important; }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            border-bottom: 1px solid #E2E8F0 !important;
+        }
+
+        .nav-tabs .nav-link {
+            color: #64748B !important;
+            font-weight: 600;
+            font-size: 0.92rem;
+            padding: 0.65rem 1.25rem;
+            border: none !important;
+            border-bottom: 2px solid transparent !important;
+            background: transparent !important;
+            border-radius: 0 !important;
+            transition: all 0.15s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #2563EB !important;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #2563EB !important;
+            border-bottom: 2px solid #2563EB !important;
+            background: transparent !important;
+            font-weight: 700 !important;
+        }
+
+        /* Tables */
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: #0F172A;
+        }
+
+        .table-custom {
+            color: #0F172A !important;
+            margin-bottom: 0;
+        }
+
+        .table-custom thead th {
+            background-color: #F8FAFC !important;
+            color: #475569 !important;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #E2E8F0 !important;
+            padding: 0.85rem 1rem;
+        }
+
+        .table-custom tbody td {
+            border-bottom: 1px solid #F1F5F9 !important;
+            padding: 0.95rem 1rem;
+            font-size: 0.88rem;
+            vertical-align: middle;
+            background-color: #FFFFFF !important;
+            color: #1E293B !important;
+        }
+
+        .table-custom tbody tr:hover td {
+            background-color: #F8FAFC !important;
+        }
+
+        code {
+            background-color: #F1F5F9;
+            color: #0284C7;
+            padding: 0.2rem 0.4rem;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            border: 1px solid #E2E8F0;
+        }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #2563EB, #1D4ED8) !important;
+            border: 1px solid #1D4ED8 !important;
+            color: #FFFFFF !important;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 0.55rem 1.15rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-primary-custom:hover {
+            background: linear-gradient(135deg, #1D4ED8, #1E40AF) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-secondary-custom {
+            background-color: #FFFFFF !important;
+            border: 1px solid #CBD5E1 !important;
+            color: #334155 !important;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 0.55rem 1.15rem;
+            transition: all 0.15s ease;
+        }
+
+        .btn-secondary-custom:hover {
+            background-color: #F1F5F9 !important;
+            color: #0F172A !important;
+            border-color: #94A3B8 !important;
+        }
+
+        /* Modals & Forms */
+        .modal-content {
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #E2E8F0 !important;
+            padding: 1rem 1.25rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #E2E8F0 !important;
+        }
+
+        .modal-title {
+            color: #0F172A !important;
+            font-weight: 700;
+        }
+
+        .form-control, .form-select {
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+            border: 1px solid #CBD5E1 !important;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            padding: 0.55rem 0.85rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #2563EB !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+            background-color: #FFFFFF !important;
+            color: #0F172A !important;
+        }
+
+        .form-control::placeholder {
+            color: #94A3B8 !important;
+        }
+
+        .form-label {
+            color: #334155 !important;
+            font-weight: 600;
+            font-size: 0.82rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .input-group-text {
+            background-color: #F8FAFC !important;
+            border-color: #CBD5E1 !important;
+            color: #64748B !important;
+        }
+
+        /* Fix text-white on headings/td in light theme */
+        .text-white:not(.badge):not(.btn):not(.brand-badge):not(.portal-badge):not(.btn *):not(.badge *):not(.bg-primary *):not(.bg-success *):not(.bg-danger *) {
+            color: #0F172A !important;
+        }
+
+        /* Footer */
+        .footer-custom {
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-align: center;
+            background-color: #FFFFFF;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-xl navbar-custom sticky-top">
+        <div class="container-fluid px-3">
+            <a class="navbar-brand d-flex align-items-center gap-2 text-nowrap" href="{% url 'dashboard_home' %}">
+                <span class="brand-badge text-nowrap"><i class="bi bi-shield-check"></i> AccessIQ</span>
+                <span class="d-none d-xxl-inline-block text-muted small ms-1 text-nowrap">Campus Security</span>
+            </a>
+
+            <button class="navbar-toggler text-dark border-secondary-subtle" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <i class="bi bi-list fs-3 text-dark"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-xl-0 ms-xl-2 gap-1 align-items-xl-center">
+                    <li class="nav-item">
+                        <a class="nav-link-custom text-nowrap {% if request.resolver_match.url_name == 'dashboard_home' %}active{% endif %}" href="{% url 'dashboard_home' %}">
+                            <i class="bi bi-grid-1x2"></i> Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom text-nowrap {% if request.resolver_match.url_name == 'live_verification_station' %}active{% endif %}" href="{% url 'live_verification_station' %}">
+                            <i class="bi bi-person-bounding-box text-warning"></i> Access Station
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom text-nowrap {% if request.resolver_match.url_name == 'quick_enroll' %}active{% endif %}" href="{% url 'quick_enroll' %}">
+                            <i class="bi bi-camera-fill text-cyan"></i> Enroll Card
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom text-nowrap {% if request.resolver_match.url_name == 'dashboard_users' %}active{% endif %}" href="{% url 'dashboard_users' %}">
+                            <i class="bi bi-people"></i> Identities
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom text-nowrap {% if request.resolver_match.url_name == 'dashboard_visitors' %}active{% endif %}" href="{% url 'dashboard_visitors' %}">
+                            <i class="bi bi-ticket-perforated"></i> Visitors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom text-nowrap {% if request.resolver_match.url_name == 'dashboard_reports' %}active{% endif %}" href="{% url 'dashboard_reports' %}">
+                            <i class="bi bi-file-earmark-arrow-down"></i> Reports
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2 mt-2 mt-xl-0 flex-nowrap ms-auto ms-xl-2">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-2 small d-none d-xxl-inline-flex text-nowrap">
+                        <i class="bi bi-circle-fill me-1 small"></i> Online
+                    </span>
+                    <a href="{% url 'bouncer_dashboard' %}" class="btn btn-sm btn-outline-info text-nowrap d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-shield-shaded"></i> Bouncer Portal
+                    </a>
+                    {% if request.user.is_authenticated %}
+                        <span class="badge bg-light text-dark border px-2 py-2 small text-nowrap d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-person-circle"></i> {{ request.user.username }}
+                        </span>
+                        <a href="{% url 'bouncer_logout' %}" class="btn btn-sm btn-outline-danger text-nowrap d-inline-flex align-items-center gap-1" title="Sign Out">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    {% else %}
+                        <a href="{% url 'bouncer_login' %}" class="btn btn-sm btn-primary-custom text-nowrap">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main View Content -->
+    <div class="main-wrapper">
+        <div class="container-fluid px-2">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container-fluid d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+            <div>
+                <strong>AccessIQ</strong> — Smart Campus Identity, Access & Security Management System
+            </div>
+            <div class="text-secondary small">
+                Dual-Factor Barcode & Facial Biometrics Engine • Security & Access Only
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
