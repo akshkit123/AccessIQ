@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "AccessIQ",
+    "slug": "accessiq",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "buildNumber": "1.0.0",
+      "supportsTablet": true
+    },
+    "android": {
+      "permissions": ["CAMERA"],
+      "compileSdkVersion": 31,
+      "targetSdkVersion": 31,
+      "buildType": "release",
+      "enableDexingArtifactTransform": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      ["expo-build-properties", {
+        "android": {
+          "enableProguardInReleaseBuilds": true,
+          "extraProguardRules": "-keep class com.google.android.gms.** { *; }"
+        }
+      }],
+      "expo-secure-store"
+    ]
+  }
+}
