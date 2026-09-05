@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}AccessIQ Command Center - Campus Security Overview{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1 text-dark">Campus Security Command Center</h2>
+        <p class="text-muted small mb-0">Real-time biometrics, identity verification, and perimeter access monitoring</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'live_verification_station' %}" class="btn btn-primary-custom d-flex align-items-center gap-2">
+            <i class="bi bi-camera"></i> Launch Access Terminal
+        </a>
+        <a href="{% url 'dashboard_reports' %}" class="btn btn-secondary-custom d-flex align-items-center gap-2">
+            <i class="bi bi-download"></i> Export Data
+        </a>
+    </div>
+</div>
+
+<!-- Key Performance Indicators (KPI Cards) -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-title">Total Registered Identities</div>
+            <div class="stat-value text-dark">{{ total_users }}</div>
+            <div class="stat-subtext">{{ total_students }} Students • {{ total_staff }} Staff</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-xl-3">
+        <div class="stat-card green">
+            <div class="stat-title">Today's Access Granted</div>
+            <div class="stat-value text-success">{{ today_granted }}</div>
+            <div class="stat-subtext">Successful dual-factor verifications</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-xl-3">
+        <div class="stat-card red">
+            <div class="stat-title">Today's Access Denied</div>
+            <div class="stat-value text-danger">{{ today_denied }}</div>
+            <div class="stat-subtext">Failed barcode / face mismatch</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 col-xl-3">
+        <div class="stat-card yellow">
+            <div class="stat-title">Active Campus Visitors</div>
+            <div class="stat-value text-warning">{{ active_visitors }}</div>
+            <div class="stat-subtext">Currently on premises</div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Gate Metrics Row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card-custom py-3 text-center">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">Today's Verifications</div>
+            <div class="fs-3 fw-bold text-dark">{{ today_attempts }}</div>
+            <span class="badge bg-secondary-subtle text-secondary small">Total Checks</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card-custom py-3 text-center">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">Today's Entries</div>
+            <div class="fs-3 fw-bold text-success">{{ today_entries }}</div>
+            <span class="badge bg-success-subtle text-success small">Inward Flow</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card-custom py-3 text-center">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">Today's Exits</div>
+            <div class="fs-3 fw-bold text-info">{{ today_exits }}</div>
+            <span class="badge bg-info-subtle text-info small">Outward Flow</span>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card-custom py-3 text-center">
+            <div class="text-muted small text-uppercase fw-semibold mb-1">Active Passes</div>
+            <div class="fs-3 fw-bold text-primary">{{ active_passes }}</div>
+            <span class="badge bg-primary-subtle text-primary small">Temporary Passes</span>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics Charts Row -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-lg-8">
+        <div class="card-custom h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-graph-up text-primary me-2"></i>Access Trends (Last 7 Days)</h5>
+                    <span class="text-muted small">Granted vs. Denied access attempts across all campus gates</span>
+                </div>
+                <span class="badge bg-secondary-subtle text-secondary">Daily Aggregate</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="dailyAccessChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="card-custom h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-pie-chart text-cyan me-2"></i>Authentication Outcome</h5>
+                    <span class="text-muted small">Success vs. Failure Distribution</span>
+                </div>
+            </div>
+            <div style="height: 240px; position: relative;" class="d-flex justify-content-center align-items-center">
+                <canvas id="outcomePieChart"></canvas>
+            </div>
+            <div class="d-flex justify-content-around text-center mt-2 pt-2 border-top border-secondary-subtle">
+                <div>
+                    <span class="text-muted small">Granted</span>
+                    <div class="fw-bold text-success">{{ today_granted }}</div>
+                </div>
+                <div>
+                    <span class="text-muted small">Denied</span>
+                    <div class="fw-bold text-danger">{{ today_denied }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Peak Hourly Gate Activity Chart Row -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card-custom h-100">
+            <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-clock-history me-2 text-info"></i>Peak Hourly Gate Activity</h5>
+            <span class="text-muted small mb-3 d-block">Hourly distribution of student & staff verifications at College Main Gate today</span>
+            <div style="height: 250px; position: relative;">
+                <canvas id="hourlyTrafficChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Access Log Stream -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card-custom">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history text-primary me-2"></i>Recent Access Event Log</h5>
+                    <span class="text-muted small">Audit records of dual-factor authentication scans</span>
+                </div>
+                <a href="{% url 'live_verification_station' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-arrow-repeat"></i> Live Monitor
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Scanned ID</th>
+                            <th>Name / Identity</th>
+                            <th>Direction</th>
+                            <th>Biometrics</th>
+                            <th>Decision</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td class="text-muted small">{{ log.timestamp|date:"H:i:s" }}</td>
+                            <td><code>{{ log.scanned_barcode }}</code></td>
+                            <td class="fw-semibold">
+                                {% if log.student %}
+                                    <span class="text-dark">{{ log.student.full_name }}</span>
+                                    <span class="badge bg-primary-subtle text-primary ms-1 small">Student</span>
+                                {% elif log.staff %}
+                                    <span class="text-dark">{{ log.staff.full_name }}</span>
+                                    <span class="badge bg-info-subtle text-info ms-1 small">Staff</span>
+                                {% elif log.visitor_name %}
+                                    <span class="text-dark">{{ log.visitor_name }}</span>
+                                    <span class="badge bg-warning-subtle text-warning ms-1 small">Visitor</span>
+                                {% else %}
+                                    <span class="text-muted">Unidentified</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if log.direction == 'ENTRY' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-box-arrow-in-right me-1"></i>Entry</span>
+                                {% else %}
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle"><i class="bi bi-box-arrow-right me-1"></i>Exit</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if log.face_verified %}
+                                    <span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill"></i> Matched</span>
+                                {% else %}
+                                    <span class="text-danger small fw-semibold"><i class="bi bi-x-circle-fill"></i> Fail / Skip</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if log.final_decision == 'GRANTED' %}
+                                    <span class="badge-granted"><i class="bi bi-shield-check"></i> GRANTED</span>
+                                {% else %}
+                                    <span class="badge-denied" title="{{ log.failure_reason }}"><i class="bi bi-shield-x"></i> DENIED</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                                No access log events recorded yet today. Launch the access terminal to simulate entries!
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Daily Access Trend Chart
+    const dailyCtx = document.getElementById('dailyAccessChart').getContext('2d');
+    new Chart(dailyCtx, {
+        type: 'line',
+        data: {
+            labels: {{ daily_labels|safe }},
+            datasets: [
+                {
+                    label: 'Granted',
+                    data: {{ daily_granted|safe }},
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                    tension: 0.35,
+                    fill: true,
+                    pointRadius: 4,
+                },
+                {
+                    label: 'Denied',
+                    data: {{ daily_denied|safe }},
+                    borderColor: '#EF4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                    tension: 0.35,
+                    fill: true,
+                    pointRadius: 4,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#475569', font: { family: 'Plus Jakarta Sans', weight: '600' } } }
+            },
+            scales: {
+                x: { grid: { color: '#E2E8F0' }, ticks: { color: '#64748B' } },
+                y: { grid: { color: '#E2E8F0' }, ticks: { color: '#64748B', stepSize: 1 } }
+            }
+        }
+    });
+
+    // Outcome Pie Chart
+    const outcomeCtx = document.getElementById('outcomePieChart').getContext('2d');
+    new Chart(outcomeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Granted', 'Denied'],
+            datasets: [{
+                data: [{{ today_granted }}, {{ today_denied }}],
+                backgroundColor: ['#10B981', '#EF4444'],
+                borderWidth: 0,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#475569', font: { family: 'Plus Jakarta Sans', weight: '600' } } }
+            },
+            cutout: '72%'
+        }
+    });
+
+    // Peak Hourly Gate Activity Chart
+    const hourlyCtx = document.getElementById('hourlyTrafficChart').getContext('2d');
+    new Chart(hourlyCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ hourly_labels|safe }},
+            datasets: [{
+                label: 'Gate Verifications',
+                data: {{ hourly_counts|safe }},
+                backgroundColor: '#0284c7',
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: (items) => `Time: ${items[0].label}`,
+                        label: (item) => ` Gate Verifications: ${item.formattedValue}`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: '#64748B',
+                        autoSkip: true,
+                        maxTicksLimit: 12,
+                        maxRotation: 0
+                    }
+                },
+                y: { grid: { color: '#E2E8F0' }, ticks: { color: '#64748B', stepSize: 1, precision: 0 } }
+            }
+        }
+    });
+</script>
+{% endblock %}
