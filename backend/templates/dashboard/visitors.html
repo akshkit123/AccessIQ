@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}AccessIQ - Visitors & Temporary Passes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1 text-dark"><i class="bi bi-ticket-perforated text-info me-2"></i>Visitor Management & Temporary Passes</h2>
+        <p class="text-muted small mb-0">Guest check-in, purpose verification, and time-bound digital QR passes</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Active Temporary Passes -->
+    <div class="col-12 col-lg-6">
+        <div class="card-custom h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-qr-code-scan me-2 text-warning"></i>Issued Temporary Passes</h5>
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Pass Code</th>
+                            <th>Visitor</th>
+                            <th>Valid Until</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in passes %}
+                        <tr>
+                            <td><code>{{ p.pass_code }}</code></td>
+                            <td class="fw-semibold text-dark">{{ p.visitor.full_name }}</td>
+                            <td class="small text-muted">{{ p.valid_until|date:"M d, H:i" }}</td>
+                            <td>
+                                {% if p.status == 'ACTIVE' and p.is_valid %}
+                                    <span class="badge bg-success-subtle text-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger">{{ p.status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center py-4 text-muted">No temporary passes issued yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registered Visitors List -->
+    <div class="col-12 col-lg-6">
+        <div class="card-custom h-100">
+            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-person-lines-fill me-2 text-primary"></i>Visitor Registration Log</h5>
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Visitor</th>
+                            <th>Host / Person to Meet</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in visitors %}
+                        <tr>
+                            <td class="fw-semibold text-dark">
+                                {{ v.full_name }}
+                                <div class="text-muted small">{{ v.organization|default:"Individual" }}</div>
+                            </td>
+                            <td>{{ v.person_to_meet }}</td>
+                            <td class="small">{{ v.purpose_of_visit }}</td>
+                            <td>
+                                <span class="badge {% if v.status == 'APPROVED' %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                                    {{ v.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center py-4 text-muted">No visitor records found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
