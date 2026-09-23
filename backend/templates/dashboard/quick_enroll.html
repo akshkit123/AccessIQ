@@ -1,0 +1,977 @@
+{% extends "base.html" %}
+
+{% block title %}AccessIQ - Scan & Enroll Student (Mobile & Barcode){% endblock %}
+
+{% block extra_css %}
+<style>
+.college-scanner-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    background: #000000 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#collegeScannerVideo {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    background: #000000 !important;
+    z-index: 1 !important;
+}
+
+.college-scanner-layout {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 10 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 35px 20px 45px 20px !important;
+    box-sizing: border-box !important;
+    pointer-events: none !important;
+    background: radial-gradient(circle at center, rgba(0,0,0,0.1) 40%, rgba(0, 0, 0, 0.75) 90%) !important;
+}
+
+.college-scanner-pill {
+    pointer-events: auto !important;
+    background: rgba(18, 18, 18, 0.9) !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    padding: 10px 24px !important;
+    border-radius: 25px !important;
+    text-align: center !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7) !important;
+    letter-spacing: 0.3px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+.college-scanner-center {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 18px !important;
+}
+
+.college-scanner-frame {
+    width: 86% !important;
+    max-width: 360px !important;
+    height: 165px !important;
+    border: 3.5px solid #00b4d8 !important;
+    border-radius: 18px !important;
+    position: relative !important;
+    box-shadow: 0 0 30px rgba(0, 180, 216, 0.5), inset 0 0 20px rgba(0, 180, 216, 0.2) !important;
+    overflow: hidden !important;
+    transition: all 0.25s ease !important;
+    background: rgba(0, 180, 216, 0.04) !important;
+}
+
+.college-scanner-frame.detected {
+    border-color: #22c55e !important;
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.9), inset 0 0 30px rgba(34, 197, 94, 0.4) !important;
+}
+
+.college-laser-beam {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, transparent, #00b4d8, #ffffff, #00b4d8, transparent) !important;
+    box-shadow: 0 0 15px #00b4d8, 0 0 25px #00b4d8 !important;
+    animation: collegeLaser 2.2s ease-in-out infinite !important;
+}
+
+@keyframes collegeLaser {
+    0% { top: 6%; opacity: 0.2; }
+    50% { top: 92%; opacity: 1; }
+    100% { top: 6%; opacity: 0.2; }
+}
+
+.college-scanner-actions {
+    pointer-events: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    width: 100% !important;
+}
+
+.btn-college-cyan {
+    background: #00a8cc !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 22px !important;
+    padding: 10px 24px !important;
+    font-size: 14.5px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 15px rgba(0, 168, 204, 0.45) !important;
+    transition: transform 0.1s ease, background 0.15s ease !important;
+}
+
+.btn-college-cyan:hover {
+    background: #0093b3 !important;
+}
+
+.btn-college-cyan:active {
+    transform: scale(0.95) !important;
+}
+
+.college-scanner-footer {
+    pointer-events: auto !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    margin-bottom: 5px !important;
+}
+
+.btn-college-red {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 25px !important;
+    padding: 13px 48px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5) !important;
+    min-width: 220px !important;
+    transition: transform 0.1s ease, background 0.15s ease !important;
+}
+
+.btn-college-red:hover {
+    background: #dc2626 !important;
+}
+
+.btn-college-red:active {
+    transform: scale(0.95) !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-7">
+
+        <!-- Top Header -->
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-4">
+            <div>
+                <h2 class="fw-bold mb-1 text-dark">
+                    <i class="bi bi-person-badge-fill text-cyan me-2"></i>Mobile Barcode & ID Enrollment
+                </h2>
+                <p class="text-muted small mb-0">Point phone camera at ID card barcode to scan and enroll student</p>
+            </div>
+            <a href="{% url 'dashboard_users' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-people me-1"></i> View All Directory
+            </a>
+        </div>
+
+        {% if enrolled_student %}
+        <!-- Success Card -->
+        <div class="card-custom border-success mb-4 p-4 text-center" style="background: rgba(16, 185, 129, 0.08);">
+            <div class="display-4 text-success mb-2">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1">Student Enrolled Successfully!</h3>
+            <p class="text-muted small mb-3">Barcode identity linked and facial biometrics registered into AccessIQ engine.</p>
+
+            <!-- Rendered Badge -->
+            <div class="bg-white text-dark rounded-3 p-3 shadow-lg border border-3 border-primary mx-auto text-start mb-3" style="max-width: 340px;">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                    <div>
+                        <div class="fw-bold fs-6 text-primary">MIT-WPU PUNE</div>
+                        <div class="text-muted" style="font-size: 0.7rem;">CAMPUS ACCESS PASS</div>
+                    </div>
+                    <span class="badge bg-primary">ENROLLED</span>
+                </div>
+                <div class="d-flex gap-3 align-items-center mb-2">
+                    {% if enrolled_student.photo %}
+                        <img src="{{ enrolled_student.photo.url }}" class="rounded-3 border border-secondary" style="width: 65px; height: 78px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center fw-bold fs-2" style="width: 65px; height: 78px;">
+                            🎓
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div class="fw-bold text-dark fs-6">{{ enrolled_student.full_name }}</div>
+                        <div class="text-secondary small fw-bold">ID: {{ enrolled_student.student_id }}</div>
+                        <div class="text-muted small">{{ enrolled_student.department }}</div>
+                        <div class="text-muted small">{{ enrolled_student.course }} - Sem {{ enrolled_student.semester }}</div>
+                    </div>
+                </div>
+                <div class="text-center bg-light rounded-2 py-1 px-1 border border-secondary-subtle">
+                    <svg id="enrolledBarcodeSvg" style="max-width: 100%; height: 55px;"></svg>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <a href="{% url 'live_verification_station' %}?barcode={{ enrolled_student.student_id }}" class="btn btn-primary-custom">
+                    <i class="bi bi-shield-check me-1"></i> Test in Access Terminal
+                </a>
+                <a href="{% url 'quick_enroll' %}" class="btn btn-secondary-custom">
+                    <i class="bi bi-person-plus me-1"></i> Enroll Another Student
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if error_message %}
+        <div class="alert alert-danger bg-danger-subtle border-danger text-danger mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error_message }}
+        </div>
+        {% endif %}
+
+        <!-- Enrollment Form -->
+        <div class="card-custom">
+            <form method="POST" enctype="multipart/form-data" id="enrollForm">
+                {% csrf_token %}
+                <input type="hidden" name="photo_b64" id="photoB64Input">
+
+                <!-- STEP 1: SCAN BARCODE OR UPLOAD CARD -->
+                <div class="p-3 rounded-3 mb-3 bg-light border">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                        <span class="fw-bold text-primary">
+                            <span class="badge bg-primary text-white rounded-pill me-1">1</span> Scan ID Card / Barcode
+                        </span>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-primary-custom px-3" id="btnOpenCollegeScanner">
+                                <i class="bi bi-camera-video-fill me-1"></i> Live Barcode Scanner
+                            </button>
+                            <!-- Direct Mobile Phone Camera / File Upload for Card -->
+                            <input type="file" id="barcodeCameraInput" accept="image/*" style="display: none;">
+                            <button type="button" class="btn btn-sm btn-outline-info fw-bold px-3" id="snapBarcodeScanBtn" title="Take photo or upload ID card to auto-fill all student fields">
+                                <i class="bi bi-card-image me-1"></i> 📸 Auto-Fill from ID Card Photo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Parsing Status Indicator -->
+                    <div id="aiCardProcessingBanner" class="alert alert-info py-2 px-3 small my-2 align-items-center gap-2" style="display: none;">
+                        <span class="spinner-border spinner-border-sm text-info" role="status"></span>
+                        <span id="aiCardProcessingText">AI Analyzing ID Card: Reading barcode, detecting name, course & cropping photo...</span>
+                    </div>
+
+                    <!-- AI Success Summary Box -->
+                    <div id="aiCardSuccessBox" class="alert alert-success py-2 px-3 small my-2 align-items-center justify-content-between flex-wrap gap-2" style="display: none;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                            <div>
+                                <strong id="aiSuccessTitle">ID Card Analyzed Successfully!</strong>
+                                <div id="aiSuccessDetails" class="text-secondary small">All details and passport photo auto-filled.</div>
+                            </div>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success">AI 100% Extracted</span>
+                    </div>
+
+                    <!-- Hidden Live Scanner Canvas & Containers -->
+                    <div id="quickBarcodeReader" style="display: none;"></div>
+
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-muted small fw-semibold">STUDENT ID / ROLL NO</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                                <input type="text" name="id_number" id="idNumberInput" class="form-control" placeholder="e.g. 1272250279" required>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-muted small fw-semibold">BARCODE VALUE (IF DIFFERENT)</label>
+                            <input type="text" name="barcode" id="barcodeValueInput" class="form-control" placeholder="Matches Student ID">
+                        </div>
+                    </div>
+                    <div id="scanStatusBadge" class="mt-2 small text-success" style="display: none;">
+                        <i class="bi bi-check-circle-fill me-1"></i> <span id="scanStatusText">Barcode Scanned</span>
+                    </div>
+                </div>
+
+                <!-- STEP 2: FACE PHOTO -->
+                <div class="p-3 rounded-3 mb-3 bg-light border">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                        <span class="fw-bold text-success">
+                            <span class="badge bg-success text-white rounded-pill me-1">2</span> Student Face Photo (Auto-Cropped from Card or Live Camera)
+                        </span>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-success" id="startFaceCamBtn">
+                                <i class="bi bi-camera"></i> Take Live Selfie
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Webcam Snapshot Box (Toggled) -->
+                    <div id="faceCamBox" class="mb-3 p-2 bg-white rounded-3 border" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small text-muted"><i class="bi bi-person-bounding-box me-1"></i>Position face inside frame</span>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-xs btn-outline-warning py-0 px-2 small" id="toggleEnrollMirrorBtn" title="Toggle Mirror / Flip View">
+                                    <i class="bi bi-symmetry-vertical"></i> <span id="enrollMirrorText">Mirror: ON</span>
+                                </button>
+                                <button type="button" class="btn btn-xs btn-success py-0 px-2 small" id="snapFacePhotoBtn">Snap Face</button>
+                                <button type="button" class="btn btn-xs btn-outline-danger py-0 px-2 small" id="closeFaceCamBtn">Cancel</button>
+                            </div>
+                        </div>
+                        <div style="max-width: 280px; height: 210px; margin: 0 auto; background: #000; border-radius: 6px; overflow: hidden;">
+                            <video id="faceCamVideo" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); -webkit-transform: scaleX(-1);"></video>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div id="photoPreviewContainer" class="border rounded-3 bg-white d-flex align-items-center justify-content-center text-muted" style="width: 70px; height: 85px; flex-shrink: 0; overflow: hidden;">
+                            <img id="photoPreviewImg" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                            <span id="photoPreviewPlaceholder" class="fs-3">👤</span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <label class="form-label text-muted small fw-semibold mb-1">STUDENT PHOTO (AUTO-LOADED FROM CARD)</label>
+                            <input type="file" name="photo" id="filePhotoInput" class="form-control form-control-sm" accept="image/*" capture="user">
+                            <div class="form-text text-muted small">ID card photo is auto-cropped above! You can also take a webcam photo or upload another image.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: STUDENT DETAILS -->
+                <div class="p-3 rounded-3 mb-4 bg-light border">
+                    <div class="fw-bold text-dark mb-2">
+                        <span class="badge bg-secondary text-white rounded-pill me-1">3</span> Student Identity Profile (Auto-Filled from ID Card)
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-muted small fw-semibold">FIRST NAME</label>
+                            <input type="text" name="first_name" id="firstNameInput" class="form-control" placeholder="e.g. Priyesh" required>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-muted small fw-semibold">LAST NAME / SURNAME</label>
+                            <input type="text" name="last_name" id="lastNameInput" class="form-control" placeholder="e.g. Nandanwar" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label text-muted small fw-semibold">DEPARTMENT / FACULTY</label>
+                            <input type="text" name="department" id="departmentInput" class="form-control" value="Faculty of Engineering and Technology" required>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <label class="form-label text-muted small fw-semibold">COURSE</label>
+                            <input type="text" name="course" id="courseInput" class="form-control" value="MCA">
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <label class="form-label text-muted small fw-semibold">SEMESTER</label>
+                            <input type="number" name="semester" id="semesterInput" class="form-control" value="3" min="1" max="8">
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">EMERGENCY / CONTACT PHONE</label>
+                            <input type="text" name="contact_phone" id="contactPhoneInput" class="form-control" placeholder="e.g. 916268643686">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <div class="d-grid">
+                    <button type="submit" id="submitEnrollBtn" class="btn btn-primary-custom py-2 fs-6">
+                        <i class="bi bi-check-circle-fill me-2"></i> SAVE & ENROLL STUDENT INTO ACCESSIQ
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- EXACT COLLEGE ID BARCODE SCANNER OVERLAY (Matches User Screenshot) -->
+<div id="collegeIdScannerOverlay" class="college-scanner-backdrop" style="display: none;">
+    <video id="collegeScannerVideo" autoplay playsinline muted></video>
+
+    <div class="college-scanner-layout">
+        <!-- Top Instruction Pill -->
+        <div class="college-scanner-pill">
+            <i class="bi bi-upc-scan me-2 text-cyan"></i>Align College ID Barcode inside frame
+        </div>
+
+        <!-- Center Section: Frame & Immediate Controls -->
+        <div class="college-scanner-center">
+            <!-- Center Cyan Target Frame -->
+            <div class="college-scanner-frame" id="collegeScannerFrame">
+                <div class="college-laser-beam"></div>
+            </div>
+
+            <!-- Action Buttons: Back Cam, Mirror, Auto-Fill -->
+            <div class="college-scanner-actions">
+                <button type="button" class="btn-college-cyan" id="btnToggleFacing">
+                    <span id="facingIcon">🔄</span> <span id="facingText">Back Cam</span>
+                </button>
+                <button type="button" class="btn-college-cyan" id="btnToggleMirror">
+                    <span id="mirrorIcon">🪞</span> Mirror
+                </button>
+                <button type="button" class="btn-college-cyan" id="btnSnapAndParseCard" style="background: linear-gradient(135deg, #06b6d4, #2563eb) !important;">
+                    <span id="aiScanIcon">⚡</span> Auto-Fill Details
+                </button>
+            </div>
+        </div>
+
+        <!-- Red Close Button -->
+        <div class="college-scanner-footer">
+            <button type="button" class="btn-college-red" id="btnCloseCollegeScanner">
+                Close Scanner
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const idNumberInput = document.getElementById('idNumberInput');
+    const barcodeValueInput = document.getElementById('barcodeValueInput');
+    const firstNameInput = document.getElementById('firstNameInput');
+    const lastNameInput = document.getElementById('lastNameInput');
+    const departmentInput = document.getElementById('departmentInput');
+    const courseInput = document.getElementById('courseInput');
+    const semesterInput = document.getElementById('semesterInput');
+    const contactPhoneInput = document.getElementById('contactPhoneInput');
+    const scanStatusBadge = document.getElementById('scanStatusBadge');
+    const scanStatusText = document.getElementById('scanStatusText');
+
+    const aiCardProcessingBanner = document.getElementById('aiCardProcessingBanner');
+    const aiCardProcessingText = document.getElementById('aiCardProcessingText');
+    const aiCardSuccessBox = document.getElementById('aiCardSuccessBox');
+    const aiSuccessTitle = document.getElementById('aiSuccessTitle');
+    const aiSuccessDetails = document.getElementById('aiSuccessDetails');
+
+    function applyExtractedCardData(data) {
+        if (!data) return;
+
+        if (data.student_id) idNumberInput.value = data.student_id;
+        if (data.barcode) {
+            barcodeValueInput.value = data.barcode;
+        } else if (data.student_id) {
+            barcodeValueInput.value = data.student_id;
+        }
+
+        if (data.first_name) firstNameInput.value = data.first_name;
+        if (data.last_name) lastNameInput.value = data.last_name;
+        if (data.department) departmentInput.value = data.department;
+        if (data.course) courseInput.value = data.course;
+        if (data.semester) semesterInput.value = data.semester;
+        if (data.contact_phone) contactPhoneInput.value = data.contact_phone;
+
+        // Auto-populate photo cropped directly from card
+        if (data.photo_b64) {
+            photoB64Input.value = data.photo_b64;
+            photoPreviewImg.src = data.photo_b64;
+            photoPreviewImg.style.display = 'block';
+            photoPreviewPlaceholder.style.display = 'none';
+        }
+
+        playCollegeBeep();
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+        if (aiCardSuccessBox) {
+            aiCardSuccessBox.style.display = 'flex';
+            aiSuccessTitle.innerText = `${data.full_name || data.first_name || 'Student'} (${data.student_id}) Auto-Filled!`;
+            aiSuccessDetails.innerText = `Course: ${data.course || 'MCA'} | Department: ${data.department || 'Faculty of Engineering and Technology'} | Phone: ${data.contact_phone || 'Extracted'}`;
+        }
+
+        scanStatusBadge.style.display = 'block';
+        scanStatusBadge.className = 'mt-2 small text-success';
+        scanStatusText.innerText = 'Card Analyzed & Filled: ' + (data.full_name || data.student_id);
+    }
+
+    // --- EXACT COLLEGE ID BARCODE SCANNER LOGIC ---
+    let collegeScannerStream = null;
+    let collegeFacingMode = 'environment';
+    let collegeMirrored = false;
+    let collegeScanningActive = false;
+    let collegeDetectTimer = null;
+    let zxingReader = null;
+    let nativeBarcodeDetector = null;
+
+    if ('BarcodeDetector' in window) {
+        try {
+            nativeBarcodeDetector = new BarcodeDetector({
+                formats: ['code_128', 'code_39', 'ean_13', 'qr_code', 'upc_a', 'upc_e']
+            });
+        } catch (e) {
+            console.warn('BarcodeDetector formats init:', e);
+        }
+    }
+
+    const collegeOverlay = document.getElementById('collegeIdScannerOverlay');
+    const collegeVideo = document.getElementById('collegeScannerVideo');
+    const collegeFrame = document.getElementById('collegeScannerFrame');
+    const btnOpenCollegeScanner = document.getElementById('btnOpenCollegeScanner');
+    const btnCloseCollegeScanner = document.getElementById('btnCloseCollegeScanner');
+    const btnToggleFacing = document.getElementById('btnToggleFacing');
+    const btnToggleMirror = document.getElementById('btnToggleMirror');
+    const btnSnapAndParseCard = document.getElementById('btnSnapAndParseCard');
+    const facingText = document.getElementById('facingText');
+
+    if (btnOpenCollegeScanner) {
+        btnOpenCollegeScanner.addEventListener('click', () => {
+            openCollegeScanner();
+        });
+    }
+
+    if (btnCloseCollegeScanner) {
+        btnCloseCollegeScanner.addEventListener('click', () => {
+            closeCollegeScanner();
+        });
+    }
+
+    if (btnToggleFacing) {
+        btnToggleFacing.addEventListener('click', async () => {
+            collegeFacingMode = (collegeFacingMode === 'environment') ? 'user' : 'environment';
+            if (facingText) {
+                facingText.innerText = (collegeFacingMode === 'environment') ? 'Back Cam' : 'Front Cam';
+            }
+            await restartCollegeCamera();
+        });
+    }
+
+    if (btnToggleMirror) {
+        btnToggleMirror.addEventListener('click', () => {
+            collegeMirrored = !collegeMirrored;
+            collegeVideo.style.transform = collegeMirrored ? 'scaleX(-1)' : 'scaleX(1)';
+        });
+    }
+
+    if (btnSnapAndParseCard) {
+        btnSnapAndParseCard.addEventListener('click', async () => {
+            if (!collegeVideo || collegeVideo.readyState < collegeVideo.HAVE_CURRENT_DATA) return;
+
+            btnSnapAndParseCard.disabled = true;
+            btnSnapAndParseCard.innerHTML = '<span>⏳</span> AI Analyzing...';
+
+            const canvas = document.createElement('canvas');
+            canvas.width = collegeVideo.videoWidth || 1280;
+            canvas.height = collegeVideo.videoHeight || 720;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(collegeVideo, 0, 0, canvas.width, canvas.height);
+            const b64 = canvas.toDataURL('image/jpeg', 0.92);
+
+            try {
+                const resp = await fetch('/api/identity/parse-id-card/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_b64: b64 })
+                });
+                const data = await resp.json();
+
+                if (data.success && (data.student_id || data.name)) {
+                    collegeFrame.classList.add('detected');
+                    playCollegeBeep();
+                    setTimeout(() => {
+                        closeCollegeScanner();
+                        applyExtractedCardData(data);
+                    }, 500);
+                } else {
+                    alert('Card details could not be detected from this frame.\n\n💡 Tip: Hold the ID card steady inside the cyan box and tap Auto-Fill again.');
+                }
+            } catch (e) {
+                alert('Scan error: ' + e.message);
+            } finally {
+                btnSnapAndParseCard.disabled = false;
+                btnSnapAndParseCard.innerHTML = '<span id="aiScanIcon">⚡</span> Auto-Fill Details';
+            }
+        });
+    }
+
+    async function openCollegeScanner() {
+        collegeOverlay.style.display = 'block';
+        collegeFrame.classList.remove('detected');
+        collegeScanningActive = true;
+        await startCollegeCamera();
+    }
+
+    function closeCollegeScanner() {
+        collegeScanningActive = false;
+        if (collegeDetectTimer) {
+            clearInterval(collegeDetectTimer);
+            collegeDetectTimer = null;
+        }
+        if (collegeScannerStream) {
+            collegeScannerStream.getTracks().forEach(t => t.stop());
+            collegeScannerStream = null;
+        }
+        if (zxingReader) {
+            try { zxingReader.reset(); } catch(e) {}
+        }
+        collegeOverlay.style.display = 'none';
+    }
+
+    async function restartCollegeCamera() {
+        if (collegeDetectTimer) {
+            clearInterval(collegeDetectTimer);
+            collegeDetectTimer = null;
+        }
+        if (collegeScannerStream) {
+            collegeScannerStream.getTracks().forEach(t => t.stop());
+            collegeScannerStream = null;
+        }
+        if (zxingReader) {
+            try { zxingReader.reset(); } catch(e) {}
+        }
+        if (collegeScanningActive) {
+            await startCollegeCamera();
+        }
+    }
+
+    async function startCollegeCamera() {
+        const constraints = {
+            video: {
+                facingMode: { ideal: collegeFacingMode },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        };
+
+        try {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    collegeScannerStream = await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (e1) {
+                    collegeScannerStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                }
+            } else {
+                const legacyGUM = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                if (legacyGUM) {
+                    collegeScannerStream = await new Promise((res, rej) => legacyGUM.call(navigator, { video: true }, res, rej));
+                } else {
+                    throw new Error("Camera streaming not supported by browser over plain HTTP.");
+                }
+            }
+
+            collegeVideo.srcObject = collegeScannerStream;
+            collegeVideo.style.transform = collegeMirrored ? 'scaleX(-1)' : 'scaleX(1)';
+            await collegeVideo.play();
+
+            // Run scanner frame detection loop
+            startCollegeDetectionLoop();
+        } catch (err) {
+            console.error('Camera open error:', err);
+            alert(
+                'Camera could not be started:\n' + err.message + '\n\n' +
+                '💡 If using Chrome on phone over HTTP, please allow this IP in Chrome:\n' +
+                '1. In Chrome URL bar, open: chrome://flags/#unsafely-treat-insecure-origin-as-secure\n' +
+                '2. Add: ' + window.location.origin + '\n' +
+                '3. Set to Enabled & Relaunch Chrome.'
+            );
+            closeCollegeScanner();
+        }
+    }
+
+    function startCollegeDetectionLoop() {
+        if (collegeDetectTimer) clearInterval(collegeDetectTimer);
+
+        collegeDetectTimer = setInterval(async () => {
+            if (!collegeScanningActive || collegeVideo.readyState < collegeVideo.HAVE_CURRENT_DATA) return;
+
+            // 1. Hardware accelerated native BarcodeDetector
+            if (nativeBarcodeDetector) {
+                try {
+                    const barcodes = await nativeBarcodeDetector.detect(collegeVideo);
+                    if (barcodes && barcodes.length > 0) {
+                        onCollegeBarcodeDetected(barcodes[0].rawValue);
+                        return;
+                    }
+                } catch (e) {}
+            }
+
+            // 2. High-speed snapshot check with ZXing
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 640;
+                canvas.height = 360;
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                ctx.drawImage(collegeVideo, 0, 0, 640, 360);
+
+                if (window.ZXing) {
+                    if (!zxingReader) zxingReader = new ZXing.BrowserMultiFormatReader();
+                    try {
+                        const result = zxingReader.decodeFromCanvas(canvas);
+                        if (result && result.text) {
+                            onCollegeBarcodeDetected(result.text);
+                            return;
+                        }
+                    } catch(e) {}
+                }
+            } catch(e) {}
+        }, 350);
+    }
+
+    async function onCollegeBarcodeDetected(rawCode) {
+        if (!collegeScanningActive) return;
+        collegeScanningActive = false;
+
+        const clean = rawCode.trim();
+
+        // Visual success: turn reticle frame bright green!
+        collegeFrame.classList.add('detected');
+
+        // Audio & Haptic feedback
+        playCollegeBeep();
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+        // Auto-close scanner after 500ms so user sees the green confirmation
+        setTimeout(() => {
+            closeCollegeScanner();
+        }, 500);
+
+        // Auto-fetch and fill student details from backend for this barcode
+        try {
+            const resp = await fetch('/api/identity/parse-id-card/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ barcode: clean })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                applyExtractedCardData(data);
+                return;
+            }
+        } catch (e) {}
+
+        // Fallback if network delay
+        idNumberInput.value = clean;
+        barcodeValueInput.value = clean;
+        scanStatusBadge.style.display = 'block';
+        scanStatusBadge.className = 'mt-2 small text-success';
+        scanStatusText.innerText = 'College ID Barcode Scanned: ' + clean;
+    }
+
+    function playCollegeBeep() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.18);
+        } catch(e) {}
+    }
+
+    // --- AI AUTO-FILL FROM ID CARD PHOTO ---
+    const snapBarcodeScanBtn = document.getElementById('snapBarcodeScanBtn');
+    const barcodeCameraInput = document.getElementById('barcodeCameraInput');
+
+    if (snapBarcodeScanBtn && barcodeCameraInput) {
+        snapBarcodeScanBtn.addEventListener('click', () => {
+            barcodeCameraInput.click();
+        });
+
+        barcodeCameraInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) processIdCardFile(file);
+        });
+    }
+
+    async function processIdCardFile(file) {
+        if (!file) return;
+
+        aiCardProcessingBanner.style.display = 'flex';
+        aiCardProcessingText.innerText = 'AI Scanning ID Card: Reading barcode, detecting name, course & cropping photo...';
+        aiCardSuccessBox.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('card_image', file);
+
+        try {
+            const resp = await fetch('/api/identity/parse-id-card/', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+            aiCardProcessingBanner.style.display = 'none';
+
+            if (data.success) {
+                applyExtractedCardData(data);
+            } else {
+                alert('Could not parse ID card: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            aiCardProcessingBanner.style.display = 'none';
+            alert('Error connecting to ID card AI analyzer: ' + err.message);
+        }
+    }
+
+    // Support Drag and Drop or Ctrl+V image paste anywhere on enrollment page
+    window.addEventListener('paste', (e) => {
+        const items = e.clipboardData && e.clipboardData.items;
+        if (!items) return;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (file) {
+                    processIdCardFile(file);
+                    break;
+                }
+            }
+        }
+    });
+
+    // --- USB BARCODE GUN LISTENER ---
+    let gunBuffer = '';
+    let lastKey = Date.now();
+    window.addEventListener('keydown', (e) => {
+        const activeEl = document.activeElement;
+        const isEditingOther = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA') && activeEl !== idNumberInput;
+        if (isEditingOther) return;
+
+        const now = Date.now();
+        const diff = now - lastKey;
+        lastKey = now;
+
+        if (e.key === 'Enter') {
+            if (gunBuffer.length >= 3 && diff < 150) {
+                e.preventDefault();
+                onBarcodeDetected(gunBuffer.trim());
+                gunBuffer = '';
+            } else {
+                gunBuffer = '';
+            }
+        } else if (e.key.length === 1) {
+            if (diff > 200) gunBuffer = '';
+            gunBuffer += e.key;
+        }
+    });
+
+    // --- LIVE WEBCAM FACE CAPTURE LOGIC ---
+    let faceStream = null;
+    let isEnrollMirrored = true;
+    const faceCamBox = document.getElementById('faceCamBox');
+    const faceCamVideo = document.getElementById('faceCamVideo');
+    const photoPreviewImg = document.getElementById('photoPreviewImg');
+    const photoPreviewPlaceholder = document.getElementById('photoPreviewPlaceholder');
+    const photoB64Input = document.getElementById('photoB64Input');
+    const filePhotoInput = document.getElementById('filePhotoInput');
+    const toggleEnrollMirrorBtn = document.getElementById('toggleEnrollMirrorBtn');
+    const enrollMirrorText = document.getElementById('enrollMirrorText');
+
+    function applyEnrollMirror() {
+        if (isEnrollMirrored) {
+            faceCamVideo.style.transform = 'scaleX(-1)';
+            faceCamVideo.style.webkitTransform = 'scaleX(-1)';
+            if (enrollMirrorText) enrollMirrorText.innerText = 'Mirror: ON';
+            if (toggleEnrollMirrorBtn) toggleEnrollMirrorBtn.className = 'btn btn-xs btn-warning py-0 px-2 small';
+        } else {
+            faceCamVideo.style.transform = 'none';
+            faceCamVideo.style.webkitTransform = 'none';
+            if (enrollMirrorText) enrollMirrorText.innerText = 'Mirror: OFF';
+            if (toggleEnrollMirrorBtn) toggleEnrollMirrorBtn.className = 'btn btn-xs btn-outline-warning py-0 px-2 small';
+        }
+    }
+
+    if (toggleEnrollMirrorBtn) {
+        toggleEnrollMirrorBtn.addEventListener('click', () => {
+            isEnrollMirrored = !isEnrollMirrored;
+            applyEnrollMirror();
+        });
+    }
+
+    document.getElementById('startFaceCamBtn').addEventListener('click', async () => {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            filePhotoInput.click();
+            return;
+        }
+        faceCamBox.style.display = 'block';
+        try {
+            faceStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }
+            });
+            faceCamVideo.srcObject = faceStream;
+            applyEnrollMirror();
+        } catch (err) {
+            filePhotoInput.click();
+            faceCamBox.style.display = 'none';
+        }
+    });
+
+    document.getElementById('closeFaceCamBtn').addEventListener('click', () => {
+        stopFaceCam();
+    });
+
+    function stopFaceCam() {
+        if (faceStream) {
+            faceStream.getTracks().forEach(t => t.stop());
+            faceStream = null;
+        }
+        faceCamBox.style.display = 'none';
+    }
+
+    document.getElementById('snapFacePhotoBtn').addEventListener('click', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = faceCamVideo.videoWidth || 480;
+        canvas.height = faceCamVideo.videoHeight || 360;
+        const ctx = canvas.getContext('2d');
+        if (isEnrollMirrored) {
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+        }
+        ctx.drawImage(faceCamVideo, 0, 0, canvas.width, canvas.height);
+
+        const b64 = canvas.toDataURL('image/jpeg', 0.88);
+        photoB64Input.value = b64;
+        photoPreviewImg.src = b64;
+        photoPreviewImg.style.display = 'block';
+        photoPreviewPlaceholder.style.display = 'none';
+
+        stopFaceCam();
+    });
+
+    // File input preview
+    filePhotoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            photoPreviewImg.src = event.target.result;
+            photoPreviewImg.style.display = 'block';
+            photoPreviewPlaceholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Render Barcode for Enrolled Student Badge if present
+    document.addEventListener('DOMContentLoaded', () => {
+        const enrolledSvg = document.getElementById('enrolledBarcodeSvg');
+        if (enrolledSvg && typeof JsBarcode === 'function') {
+            const sid = "{{ enrolled_student.student_id|default:'' }}";
+            if (sid) {
+                JsBarcode("#enrolledBarcodeSvg", sid, {
+                    format: "CODE128",
+                    lineColor: "#0f172a",
+                    width: 2,
+                    height: 50,
+                    displayValue: true,
+                    fontSize: 13
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}
