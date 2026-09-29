@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}AccessIQ - Security Alerts & Audit Trail{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1 text-dark"><i class="bi bi-shield-exclamation text-danger me-2"></i>Security Alerts & System Audit Log</h2>
+        <p class="text-muted small mb-0">Live threat monitoring, biometrics anomalies, and immutable administrative audit history</p>
+    </div>
+</div>
+
+<div class="card-custom mb-4">
+    <ul class="nav nav-tabs mb-3" id="alertTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="alerts-tab" data-bs-toggle="tab" data-bs-target="#alerts" type="button">
+                <i class="bi bi-exclamation-triangle me-1"></i> Security Alerts ({{ alerts|length }})
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="issues-tab" data-bs-toggle="tab" data-bs-target="#issues" type="button">
+                <i class="bi bi-clipboard-x me-1"></i> Reported Issues ({{ issues|length }})
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="audit-tab" data-bs-toggle="tab" data-bs-target="#audit" type="button">
+                <i class="bi bi-journal-text me-1"></i> Audit Trail ({{ audit_logs|length }})
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="alertTabsContent">
+        <!-- Security Alerts Tab -->
+        <div class="tab-pane fade show active" id="alerts">
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Alert Type</th>
+                            <th>Severity</th>
+                            <th>Location</th>
+                            <th>Presenter / Identifier</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in alerts %}
+                        <tr>
+                            <td class="text-muted small">{{ a.timestamp|date:"M d, H:i:s" }}</td>
+                            <td class="fw-semibold text-dark">{{ a.get_alert_type_display }}</td>
+                            <td>
+                                <span class="badge {% if a.severity == 'CRITICAL' %}bg-danger text-white{% elif a.severity == 'HIGH' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %}">
+                                    {{ a.severity }}
+                                </span>
+                            </td>
+                            <td><code>{{ a.location.code|default:"CAMPUS" }}</code></td>
+                            <td><code>{{ a.user_identifier }}</code></td>
+                            <td class="small">{{ a.description }}</td>
+                            <td>
+                                <span class="badge {% if a.status == 'NEW' %}bg-danger-subtle text-danger{% else %}bg-success-subtle text-success{% endif %}">
+                                    {{ a.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="text-center py-4 text-muted">No security alerts recorded.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reported Issues Tab -->
+        <div class="tab-pane fade" id="issues">
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Date / Time</th>
+                            <th>Issue Type</th>
+                            <th>Reported By</th>
+                            <th>Location / Gate</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for issue in issues %}
+                        <tr>
+                            <td class="text-muted small">{{ issue.created_at|date:"M d, H:i:s" }}</td>
+                            <td class="fw-semibold text-dark">{{ issue.get_issue_type_display }}</td>
+                            <td class="fw-semibold text-primary">{{ issue.reporter.get_full_name|default:issue.reporter.username }}</td>
+                            <td><code>{{ issue.location.code|default:"CAMPUS" }}</code></td>
+                            <td class="small">{{ issue.description }}</td>
+                            <td>
+                                <span class="badge {% if issue.status == 'OPEN' %}bg-warning-subtle text-warning{% elif issue.status == 'RESOLVED' %}bg-success-subtle text-success{% else %}bg-info-subtle text-info{% endif %}">
+                                    {{ issue.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center py-4 text-muted">No operational issues reported by security staff.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Audit Log Tab -->
+        <div class="tab-pane fade" id="audit">
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Operator</th>
+                            <th>Action</th>
+                            <th>Entity Type</th>
+                            <th>Entity ID</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in audit_logs %}
+                        <tr>
+                            <td class="text-muted small">{{ log.timestamp|date:"M d, H:i:s" }}</td>
+                            <td class="fw-semibold text-info">{{ log.user.username|default:"System" }}</td>
+                            <td><span class="badge bg-secondary-subtle text-secondary">{{ log.get_action_display }}</span></td>
+                            <td>{{ log.entity_type }}</td>
+                            <td><code>{{ log.entity_id }}</code></td>
+                            <td class="small">{{ log.details }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center py-4 text-muted">No administrative audit records logged yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
