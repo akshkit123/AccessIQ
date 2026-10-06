@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AccessIQ - Security Staff Operational Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- HTML5-QRCode Scanner Library -->
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- JsBarcode Generator -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+    <style>
+        :root {
+            --bg-body: #F8FAFC;
+            --bg-surface: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F1F5F9;
+            --bg-input: #FFFFFF;
+            --border-color: #E2E8F0;
+            --border-focus: #2563EB;
+            --accent-blue: #2563EB;
+            --accent-cyan: #0284C7;
+            --accent-green: #10B981;
+            --accent-red: #EF4444;
+            --accent-yellow: #D97706;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 75px; /* Room for bottom navigation */
+            user-select: none;
+        }
+
+        /* Top Security Header */
+        .security-header {
+            background-color: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .portal-badge {
+            background: linear-gradient(135deg, #2563EB, #0284C7);
+            color: white;
+            font-weight: 800;
+            padding: 0.35rem 0.65rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+        }
+
+        .status-pill {
+            background-color: #ECFDF5;
+            color: #059669;
+            border: 1px solid #A7F3D0;
+            font-weight: 600;
+            padding: 0.25rem 0.55rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background-color: #10B981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 6px #10B981;
+        }
+
+        /* Shift & Gate Banner */
+        .duty-banner {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.65rem 1rem;
+            font-size: 0.82rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        /* Operational Stats Cards */
+        .stat-badge-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem 0.85rem;
+            text-align: center;
+            height: 100%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-badge-num {
+            font-size: 1.45rem;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .stat-badge-lbl {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-top: 0.2rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Large Action Buttons */
+        .btn-scan-main {
+            background: linear-gradient(135deg, #2563EB, #0284C7);
+            border: 2px solid #38BDF8;
+            color: white;
+            font-weight: 800;
+            font-size: 1.25rem;
+            padding: 1.15rem 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px -3px rgba(37, 99, 235, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-scan-main:hover, .btn-scan-main:active {
+            background: linear-gradient(135deg, #1D4ED8, #0369A1);
+            transform: scale(0.99);
+            color: white;
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Direction Mode Switcher */
+        .direction-pill-container {
+            background-color: #F1F5F9;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 4px;
+            display: flex;
+            gap: 4px;
+            margin-bottom: 0.85rem;
+        }
+
+        .direction-pill-btn {
+            flex: 1;
+            padding: 0.6rem 0.5rem;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.92rem;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .direction-pill-btn.active-entry {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+        }
+
+        .direction-pill-btn.active-exit {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            color: white;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+        }
+
+        /* Tactical Action Grid */
+        .action-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1rem 0.85rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-main);
+            text-decoration: none;
+            height: 100%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .action-card:hover, .action-card:active {
+            background-color: var(--bg-card-hover);
+            border-color: #93C5FD;
+            transform: translateY(-2px);
+            color: #0F172A;
+        }
+
+        .action-icon {
+            font-size: 1.6rem;
+            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: #0F172A;
+        }
+
+        /* Bottom Fixed Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.45rem 0.25rem;
+            z-index: 1030;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        .bottom-nav-item {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.3rem 0.5rem;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+            min-width: 60px;
+        }
+
+        .bottom-nav-item i {
+            font-size: 1.25rem;
+            margin-bottom: 2px;
+        }
+
+        .bottom-nav-item.active {
+            color: #2563EB;
+            font-weight: 700;
+        }
+
+        .bottom-nav-item.scan-active {
+            color: #059669;
+            font-weight: 700;
+        }
+
+        /* Screen View Panes */
+        .tab-pane-view {
+            display: none;
+        }
+
+        .tab-pane-view.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scanner Modal / Overlay */
+        .scanner-view-container {
+            background-color: #000000;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            min-height: 280px;
+            border: 1px solid var(--border-color);
+        }
+
+        .scanner-reticle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            border: 2px solid rgba(56, 189, 248, 0.6);
+            border-radius: 12px;
+            pointer-events: none;
+            box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.45);
+        }
+
+        .scanner-laser {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #38BDF8;
+            box-shadow: 0 0 8px #38BDF8;
+            animation: laserScan 2s infinite ease-in-out;
+        }
+
+        @keyframes laserScan {
+            0% { top: 5%; }
+            50% { top: 95%; }
+            100% { top: 5%; }
+        }
+
+        /* Result Cards */
+        .result-card-granted {
+            background: #F0FDF4;
+            border: 2px solid #22C55E;
+            border-radius: 18px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+
+        .result-card-denied {
+            background: #FEF2F2;
+            border: 2px solid #EF4444;
+            border-radius: 18px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+
+        /* Minimal Identity Card */
+        .minimal-identity-card {
+            background-color: #F8FAFC;
+            border: 1px solid #BAE6FD;
+            border-radius: 16px;
+            padding: 1.25rem;
+        }
+
+        .id-photo-thumb {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid #CBD5E1;
+            background-color: #F1F5F9;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            border: 1px solid #2563EB;
+            color: #ffffff;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+        .btn-primary-custom:hover {
+            background: linear-gradient(135deg, #1D4ED8, #1E40AF);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Top Security Header Bar -->
+    <header class="security-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <span class="portal-badge">
+                <i class="bi bi-shield-shaded fs-6"></i> AccessIQ
+            </span>
+            <div class="d-flex flex-column">
+                <span class="fw-bold fs-6 text-dark lh-1">Security Portal</span>
+                <span class="text-secondary small font-monospace" style="font-size: 0.72rem;">{{ badge_number }}</span>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="status-pill d-none d-sm-inline-flex">
+                <span class="status-dot"></span> On Duty
+            </span>
+            <!-- Fixed College Main Gate Badge -->
+            <div class="d-inline-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm">
+                <i class="bi bi-door-closed-fill text-primary me-2"></i>
+                <span class="fw-bold text-dark small" id="currentGateLabel">College Main Gate</span>
+            </div>
+            <!-- Logout link -->
+            <a href="{% url 'bouncer_logout' %}" class="btn btn-sm btn-outline-danger py-1 px-2" title="Sign Out">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- 2. Officer & Shift Info Banner -->
+    <div class="duty-banner text-muted">
+        <div>
+            <i class="bi bi-person-badge-fill text-secondary me-1"></i>
+            <strong class="text-dark">{{ staff_name }}</strong>
+            <span class="mx-1">•</span>
+            <span class="text-primary fw-semibold">{{ shift_times }}</span>
+        </div>
+        <div>
+            <i class="bi bi-phone-fill text-secondary me-1"></i>
+            <span>{{ assigned_device.device_name|default:'Terminal #01' }}</span>
+            <span class="text-success ms-1 fw-semibold">✓ Authorized</span>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTENT AREA -->
+    <main class="container-fluid px-3 pt-3">
+
+        <!-- ========================================================
+             PANE 1: HOME OPERATIONAL DASHBOARD
+             ======================================================== -->
+        <section id="paneHome" class="tab-pane-view active">
+
+            <!-- Today's Operational Stats (Minimal, No Complex Analytics) -->
+            <div class="row g-2 mb-3">
+                <div class="col-4">
+                    <div class="stat-badge-card">
+                        <div class="stat-badge-num text-dark" id="statTodayScans">{{ today_scans }}</div>
+                        <div class="stat-badge-lbl">Total Scans</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="stat-badge-card">
+                        <div class="stat-badge-num text-success" id="statTodayGranted">{{ today_granted }}</div>
+                        <div class="stat-badge-lbl">Granted</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="stat-badge-card">
+                        <div class="stat-badge-num text-danger" id="statTodayDenied">{{ today_denied }}</div>
+                        <div class="stat-badge-lbl">Denied</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Direction Toggle: ENTRY / EXIT -->
+            <div class="direction-pill-container">
+                <button type="button" class="direction-pill-btn active-entry" id="btnModeEntry" onclick="setDirectionMode('ENTRY')">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> [ ENTRY ]
+                </button>
+                <button type="button" class="direction-pill-btn" id="btnModeExit" onclick="setDirectionMode('EXIT')">
+                    <i class="bi bi-box-arrow-left me-1"></i> [ EXIT ]
+                </button>
+            </div>
+
+            <!-- PRIMARY FEATURE: SCAN ID CARD BUTTON -->
+            <div class="mb-3">
+                <button type="button" class="btn-scan-main" onclick="openScannerModal()">
+                    <i class="bi bi-qr-code-scan fs-3"></i>
+                    <span>SCAN ID CARD</span>
+                </button>
+            </div>
+
+            <!-- Quick Action Grid -->
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <div class="action-card" onclick="openVisitorEntryModal()">
+                        <div class="action-icon bg-info-subtle text-info">
+                            <i class="bi bi-person-plus-fill"></i>
+                        </div>
+                        <div class="action-label">VISITOR ENTRY</div>
+                        <div class="text-secondary small" style="font-size: 0.7rem;">Issue Temp Pass</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="action-card" onclick="showTab('paneVisitors')">
+                        <div class="action-icon bg-primary-subtle text-primary">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div class="action-label">ACTIVE VISITORS</div>
+                        <div class="text-secondary small" style="font-size: 0.7rem;"><span id="statActiveVisitors">{{ active_visitors_count }}</span> Inside Campus</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="action-card" onclick="showTab('paneAlerts')">
+                        <div class="action-icon bg-danger-subtle text-danger">
+                            <i class="bi bi-shield-exclamation"></i>
+                        </div>
+                        <div class="action-label">SECURITY ALERTS</div>
+                        <div class="text-secondary small" style="font-size: 0.7rem;"><span id="statOpenAlerts">{{ open_alerts_count }}</span> Unreviewed</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="action-card" onclick="showTab('paneActivity')">
+                        <div class="action-icon bg-success-subtle text-success">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div class="action-label">MY ACTIVITY</div>
+                        <div class="text-secondary small" style="font-size: 0.7rem;">Shift Access Log</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operational Support Actions -->
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <button type="button" class="btn btn-light border text-dark w-100 py-2 fw-semibold small shadow-sm" onclick="openReportIssueModal()">
+                        <i class="bi bi-flag-fill me-1 text-warning"></i> Report Issue
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button type="button" class="btn btn-light border text-dark w-100 py-2 fw-semibold small shadow-sm" onclick="openManualCodeModal()">
+                        <i class="bi bi-keyboard-fill me-1 text-primary"></i> Manual Code
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PANE 2: ACTIVE VISITORS LIST & EXIT MANAGEMENT
+             ======================================================== -->
+        <section id="paneVisitors" class="tab-pane-view">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">Active Visitors</h5>
+                    <p class="text-muted small mb-0">Currently inside campus through this gate</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary-custom" onclick="openVisitorEntryModal()">
+                    <i class="bi bi-plus-lg me-1"></i> Register New
+                </button>
+            </div>
+
+            <div id="activeVisitorsList" class="d-flex flex-column gap-2 mb-4">
+                {% if recent_active_visitors %}
+                    {% for v in recent_active_visitors %}
+                        <div class="card bg-white border p-3 rounded-3 shadow-sm" id="visitorRow{{ v.id }}">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex gap-3 align-items-center">
+                                    {% if v.photo %}
+                                        <img src="{{ v.photo.url }}" class="rounded-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light border rounded-2 d-flex align-items-center justify-content-center text-secondary" style="width: 50px; height: 50px;">
+                                            <i class="bi bi-person fs-3"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold text-dark fs-6">{{ v.full_name }}</div>
+                                        <div class="text-muted small">{{ v.organization|default:'Individual Visitor' }}</div>
+                                        <div class="text-primary small fw-semibold">Host: {{ v.person_to_meet }}</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-success-subtle text-success small">Checked In</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light-subtle">
+                                <span class="text-muted small">
+                                    <i class="bi bi-clock me-1"></i> {{ v.entry_time|date:"h:i A" }}
+                                </span>
+                                <button type="button" class="btn btn-sm btn-outline-warning fw-semibold px-3" onclick="checkoutVisitor({{ v.id }}, '{{ v.full_name }}')">
+                                    <i class="bi bi-box-arrow-left me-1"></i> MARK EXIT
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-people fs-1 text-secondary mb-2 d-block"></i>
+                        No active visitors currently on campus.
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PANE 3: SECURITY ALERTS (Location/Shift Relevant)
+             ======================================================== -->
+        <section id="paneAlerts" class="tab-pane-view">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">Security Alerts</h5>
+                    <p class="text-muted small mb-0">Events logged at {{ current_location.name|default:'Gate' }}</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-light border text-secondary" onclick="reloadAlerts()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+
+            <div id="alertsListContainer" class="d-flex flex-column gap-2 mb-4">
+                {% if recent_alerts %}
+                    {% for a in recent_alerts %}
+                        <div class="card bg-white border p-3 rounded-3 shadow-sm" id="alertCard{{ a.id }}">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="badge {% if a.severity == 'CRITICAL' %}bg-danger text-white{% elif a.severity == 'HIGH' %}bg-danger-subtle text-danger border border-danger{% else %}bg-warning-subtle text-warning border border-warning{% endif %} small">
+                                    {{ a.get_alert_type_display }}
+                                </span>
+                                <span class="text-muted small font-monospace">{{ a.timestamp|date:"h:i A" }}</span>
+                            </div>
+                            <div class="text-dark small my-2">{{ a.description }}</div>
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light-subtle">
+                                <span class="text-secondary small">Status: <strong>{{ a.status }}</strong></span>
+                                <div class="d-flex gap-2">
+                                    {% if a.status != 'RESOLVED' and a.status != 'INVESTIGATING' %}
+                                        <button type="button" class="btn btn-sm btn-outline-info py-1 px-2 small" onclick="acknowledgeAlert({{ a.id }})">
+                                            <i class="bi bi-check2 me-1"></i> ACKNOWLEDGE
+                                        </button>
+                                    {% endif %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 small" onclick="openReportIssueModal('Alert #{{ a.id }}: {{ a.description|escapejs }}')">
+                                        <i class="bi bi-flag me-1"></i> Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-shield-check fs-1 text-success mb-2 d-block"></i>
+                        No open security alerts at this location.
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PANE 4: MY RECENT ACTIVITY
+             ======================================================== -->
+        <section id="paneActivity" class="tab-pane-view">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold mb-0 text-dark">My Shift Activity</h5>
+                    <p class="text-muted small mb-0">Verifications performed by {{ staff_name }}</p>
+                </div>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-primary active" id="filterTodayBtn" onclick="loadMyActivity('today')">Today</button>
+                    <button class="btn btn-light border text-secondary" id="filterShiftBtn" onclick="loadMyActivity('shift')">Shift</button>
+                </div>
+            </div>
+
+            <div id="myActivityContainer" class="d-flex flex-column gap-2 mb-4">
+                {% if my_recent_logs %}
+                    {% for l in my_recent_logs %}
+                        <div class="card bg-white border p-2 px-3 rounded-3 shadow-sm d-flex flex-row justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if l.final_decision == 'GRANTED' %}
+                                    <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                {% else %}
+                                    <i class="bi bi-x-circle-fill text-danger fs-4"></i>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold text-dark small">
+                                        {{ l.display_user_name }}
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">
+                                        <span class="badge bg-secondary font-monospace">{{ l.direction }}</span>
+                                        <span class="ms-1">{{ l.scanned_barcode }}</span>
+                                        {% if l.failure_reason %}<span class="text-danger ms-1">• {{ l.failure_reason }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="text-secondary small font-monospace">{{ l.timestamp|date:"h:i A" }}</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-clock-history fs-1 text-secondary mb-2 d-block"></i>
+                        No verifications recorded on this shift yet.
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PANE 5: BOUNCER PROFILE & DEVICE INFO
+             ======================================================== -->
+        <section id="paneProfile" class="tab-pane-view">
+            <h5 class="fw-bold text-dark mb-3">Security Officer Profile</h5>
+
+            <div class="card bg-white border p-3 rounded-4 mb-3 shadow-sm">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 55px; height: 55px;">
+                        <i class="bi bi-person-fill fs-2"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">{{ staff_name }}</h6>
+                        <div class="text-muted small">Role: <span class="text-primary fw-semibold">SECURITY_STAFF</span></div>
+                        <div class="text-secondary small font-monospace">Badge: {{ badge_number }}</div>
+                    </div>
+                </div>
+
+                <div class="border-top border-light-subtle pt-2 small text-muted d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Stationed Gate:</span>
+                        <strong class="text-dark">{{ current_location.name|default:'College Main Gate' }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Duty Status:</span>
+                        <span class="text-success fw-bold">ON DUTY ✓</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <a href="{% url 'bouncer_logout' %}" class="btn btn-outline-danger py-2 fw-semibold">
+                    <i class="bi bi-box-arrow-right me-2"></i> End Shift & Log Out
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================================
+         BOTTOM TACTICAL NAVIGATION BAR
+         ======================================================== -->
+    <nav class="bottom-nav">
+        <a href="javascript:void(0)" class="bottom-nav-item active" id="navItemHome" onclick="showTab('paneHome')">
+            <i class="bi bi-grid-fill"></i>
+            <span>Home</span>
+        </a>
+        <a href="javascript:void(0)" class="bottom-nav-item scan-active" onclick="openScannerModal()">
+            <i class="bi bi-qr-code-scan"></i>
+            <span>Scan ID</span>
+        </a>
+        <a href="javascript:void(0)" class="bottom-nav-item" id="navItemVisitors" onclick="showTab('paneVisitors')">
+            <i class="bi bi-people-fill"></i>
+            <span>Visitors</span>
+        </a>
+        <a href="javascript:void(0)" class="bottom-nav-item" id="navItemAlerts" onclick="showTab('paneAlerts')">
+            <i class="bi bi-shield-exclamation"></i>
+            <span>Alerts</span>
+        </a>
+        <a href="javascript:void(0)" class="bottom-nav-item" id="navItemActivity" onclick="showTab('paneActivity')">
+            <i class="bi bi-clock-history"></i>
+            <span>Activity</span>
+        </a>
+        <a href="javascript:void(0)" class="bottom-nav-item" id="navItemProfile" onclick="showTab('paneProfile')">
+            <i class="bi bi-person-fill"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- ========================================================
+         MODAL 1: CORE OPERATIONAL DUAL-FACTOR SCANNER MODAL
+         ======================================================== -->
+    <div class="modal fade" id="scannerModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content bg-white border text-dark rounded-4 shadow-lg">
+                <!-- Modal Header -->
+                <div class="modal-header border-light-subtle py-2 px-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary" id="modalDirectionBadge">[ ENTRY ]</span>
+                        <h6 class="modal-title fw-bold fs-6 mb-0 text-dark" id="scannerStepTitle">Scan ID Card</h6>
+                    </div>
+                    <button type="button" class="btn-close" onclick="closeScannerModal()"></button>
+                </div>
+
+                <!-- Modal Body with Dynamic Verification Stages -->
+                <div class="modal-body p-3">
+
+                    <!-- STAGE 1: SCAN BARCODE / QR CODE -->
+                    <div id="scanStageBarcode">
+                        <!-- Camera Feed Container -->
+                        <div class="scanner-view-container position-relative mb-3">
+                            <div id="barcodeCameraFeed" style="width: 100%; min-height: 260px;"></div>
+                            <div class="scanner-reticle" id="barcodeReticle">
+                                <div class="scanner-laser"></div>
+                            </div>
+                        </div>
+
+                        <!-- Camera controls & Manual entry toggle -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small"><i class="bi bi-camera me-1"></i> Point at Card Barcode</span>
+                            <button type="button" class="btn btn-sm btn-link text-primary p-0 text-decoration-none small fw-semibold" onclick="toggleManualBarcodeRow()">
+                                Manual Input
+                            </button>
+                        </div>
+
+                        <!-- Optional Manual Barcode Input Row -->
+                        <div id="manualBarcodeRow" class="input-group mb-2" style="display: none;">
+                            <input type="text" id="manualBarcodeInput" class="form-control bg-white border text-dark font-monospace small" placeholder="Enter barcode / ID number">
+                            <button class="btn btn-primary" type="button" onclick="submitManualBarcode()">Decode</button>
+                        </div>
+
+                        <!-- Camera Permission Alert fallback if denied -->
+                        <div id="cameraPermissionError" class="alert alert-warning py-2 px-3 small border-0 rounded-3 mb-2" style="display: none; background: #FEF3C7; color: #92400E;">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i> Camera permission required. Please allow camera access in browser settings.
+                        </div>
+                    </div>
+
+                    <!-- STAGE 2: MINIMAL IDENTITY FOUND (Section 5) -->
+                    <div id="scanStageIdentity" style="display: none;">
+                        <div class="alert alert-success py-2 px-3 small rounded-3 border-0 mb-3" style="background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0 !important;">
+                            <i class="bi bi-check-circle-fill me-1"></i> IDENTITY FOUND ✓
+                        </div>
+
+                        <div class="minimal-identity-card mb-3">
+                            <div class="d-flex gap-3 align-items-center mb-3">
+                                <img id="idCardPhotoThumb" src="" class="id-photo-thumb" onerror="this.src='https://ui-avatars.com/api/?name=Card+Holder&background=E2E8F0&color=0F172A';">
+                                <div class="d-flex flex-column">
+                                    <div class="text-muted small text-uppercase fw-bold" id="idCardRoleBadge">Student</div>
+                                    <h5 class="fw-bold text-dark mb-1" id="idCardName">--</h5>
+                                    <div class="text-secondary small font-monospace" id="idCardIdentifier">--</div>
+                                    <div class="text-muted small mt-1" id="idCardDept">--</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center border-top border-light-subtle pt-2 small">
+                                <span>Status: <strong class="text-success" id="idCardStatus">ACTIVE</strong></span>
+                                <span>Face: <strong class="text-warning" id="idCardFaceStatus">NOT VERIFIED</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mb-2">
+                            <button type="button" class="btn btn-primary-custom py-3 fs-6 fw-bold" onclick="proceedToFaceVerification()">
+                                <i class="bi bi-camera-fill me-2"></i> VERIFY FACE
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary w-100 py-2 small" onclick="resetToScanBarcode()">
+                            Cancel / Rescan ID
+                        </button>
+                    </div>
+
+                    <!-- STAGE 3: FACE VERIFICATION CAMERA (Section 6) -->
+                    <div id="scanStageFace" style="display: none;">
+                        <div class="scanner-view-container position-relative mb-2">
+                            <video id="faceVideoElement" autoplay playsinline style="width: 100%; height: 260px; object-fit: cover; transform: scaleX(-1); -webkit-transform: scaleX(-1);"></video>
+                            <canvas id="faceCaptureCanvas" style="display: none;"></canvas>
+                            <!-- Face Oval Guide -->
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 170px; height: 220px; border: 2px dashed #10B981; border-radius: 50%; pointer-events: none;"></div>
+                        </div>
+
+                        <!-- Face Status Text -->
+                        <div class="text-center mb-3">
+                            <span class="badge bg-light border text-primary px-3 py-2 fs-6 shadow-sm" id="faceMatchStatusBadge">
+                                <span class="spinner-border spinner-border-sm me-1" id="faceSpinner"></span>
+                                <span id="faceMatchStatusText">Looking for face...</span>
+                            </span>
+                        </div>
+
+                        <!-- Face Action Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success py-2 fw-bold" id="btnCaptureFace" onclick="captureAndVerifyFace()">
+                                <i class="bi bi-camera-fill me-1"></i> Capture & Compare Face
+                            </button>
+                            <div class="text-center text-muted small" style="font-size: 0.75rem;">
+                                <i class="bi bi-shield-check text-success me-1"></i> Live face detection & DeepFace biometrics active
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STAGE 4A: ACCESS GRANTED SCREEN (Section 8) -->
+                    <div id="scanStageGranted" style="display: none;">
+                        <div class="result-card-granted mb-3">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 3.5rem;"></i>
+                            <h3 class="fw-extrabold text-success mt-2 mb-1">ACCESS GRANTED</h3>
+                            <div class="text-dark fs-5 fw-bold" id="grantedName">--</div>
+                            <div class="text-secondary small font-monospace mb-3" id="grantedId">--</div>
+
+                            <div class="border-top border-success-subtle pt-2 text-start small d-flex flex-column gap-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Identity:</span>
+                                    <span class="text-success fw-bold">Verified ✓</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Face Biometrics:</span>
+                                    <span class="text-success fw-bold" id="grantedSimilarity">Matched ✓</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Location:</span>
+                                    <span class="text-dark fw-semibold" id="grantedLocation">--</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Mode / Time:</span>
+                                    <span class="text-primary fw-bold" id="grantedTime">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success py-3 fw-bold fs-6" onclick="confirmAndDoneScan()">
+                                <i class="bi bi-check2-all me-1"></i> RECORD ENTRY & DONE
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary py-2 small" onclick="closeScannerModal()">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STAGE 4B: ACCESS DENIED SCREEN (Section 9) -->
+                    <div id="scanStageDenied" style="display: none;">
+                        <div class="result-card-denied mb-3">
+                            <i class="bi bi-x-circle-fill text-danger" style="font-size: 3.5rem;"></i>
+                            <h3 class="fw-extrabold text-danger mt-2 mb-1">ACCESS DENIED</h3>
+                            <div class="badge bg-danger text-white py-1 px-3 fs-6 mb-2" id="deniedReasonBadge">Face Mismatch</div>
+                            <div class="text-dark fs-6 fw-bold" id="deniedName">--</div>
+                            <div class="text-secondary small font-monospace mb-3" id="deniedId">--</div>
+
+                            <div class="border-top border-danger-subtle pt-2 text-start small d-flex flex-column gap-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">ID Status:</span>
+                                    <span class="text-dark fw-semibold" id="deniedIdStatus">Detected</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Face Verification:</span>
+                                    <span class="text-danger fw-bold" id="deniedFaceStatus">Not Matched</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Detail:</span>
+                                    <span class="text-dark" id="deniedDetail">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-warning py-2 fw-bold text-dark" onclick="retryVerification()">
+                                <i class="bi bi-arrow-repeat me-1"></i> RETRY VERIFICATION
+                            </button>
+                            <button type="button" class="btn btn-outline-danger py-2 small" onclick="reportDeniedIssue()">
+                                <i class="bi bi-flag me-1"></i> REPORT PROBLEM
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary py-2 small" onclick="closeScannerModal()">
+                                Done / Next Scan
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 2: VISITOR REGISTRATION & PASS ISSUANCE
+         ======================================================== -->
+    <div class="modal fade" id="visitorEntryModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-white border text-dark rounded-4 shadow-lg">
+                <div class="modal-header border-light-subtle py-2 px-3">
+                    <h6 class="modal-title fw-bold text-dark"><i class="bi bi-person-plus-fill text-primary me-2"></i> Visitor Registration</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <form id="visitorRegistrationForm" onsubmit="submitVisitorRegistration(event)">
+                        <div class="mb-2">
+                            <label class="form-label text-secondary small text-uppercase fw-semibold">Visitor Full Name *</label>
+                            <input type="text" id="visitorName" class="form-control bg-white border text-dark" placeholder="e.g. Rahul Sharma" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label text-secondary small text-uppercase fw-semibold">Mobile Number *</label>
+                            <input type="tel" id="visitorPhone" class="form-control bg-white border text-dark" placeholder="e.g. 9876543210" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label text-secondary small text-uppercase fw-semibold">Purpose of Visit *</label>
+                            <input type="text" id="visitorPurpose" class="form-control bg-white border text-dark" placeholder="e.g. Campus Interview / Project Meeting" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label text-secondary small text-uppercase fw-semibold">Person to Meet (Faculty / Staff) *</label>
+                            <input type="text" id="visitorHost" class="form-control bg-white border text-dark" placeholder="e.g. Dr. Kulkarni" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small text-uppercase fw-semibold">Organization / Company (Optional)</label>
+                            <input type="text" id="visitorOrg" class="form-control bg-white border text-dark" placeholder="e.g. TechCorp">
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary-custom py-2 fw-bold" id="btnSubmitVisitor">
+                                <i class="bi bi-check2-circle me-1"></i> REGISTER & ISSUE PASS
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Pass Card Display Result -->
+                    <div id="visitorPassResult" class="mt-3 p-3 bg-light rounded-3 text-center border border-success" style="display: none;">
+                        <h6 class="text-success fw-bold mb-1">Temporary Pass Issued ✓</h6>
+                        <div class="fs-5 fw-bold text-dark" id="issuedVisitorName">--</div>
+                        <div class="badge bg-secondary font-monospace my-2 px-3 py-1" id="issuedPassCode">PASS-XXXXXX</div>
+                        <div class="d-flex justify-content-center my-2">
+                            <svg id="issuedBarcodeCanvas"></svg>
+                        </div>
+                        <div class="text-muted small">Valid for 8 Hours • Entry Recorded</div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2 w-100" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL 3: REPORT ISSUE MODAL
+         ======================================================== -->
+    <div class="modal fade" id="reportIssueModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-white border text-dark rounded-4 shadow-lg">
+                <div class="modal-header border-light-subtle py-2 px-3">
+                    <h6 class="modal-title fw-bold text-dark"><i class="bi bi-flag-fill text-warning me-2"></i> Report Problem to Supervisor</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small text-uppercase fw-semibold">Problem Category</label>
+                        <select id="issueTypeSelect" class="form-select bg-white border text-dark">
+                            <option value="BARCODE_SCAN">Barcode / QR Not Scanning</option>
+                            <option value="ID_DAMAGED">ID Card Damaged / Defaced</option>
+                            <option value="FACE_VERIFY">Face Verification Problem</option>
+                            <option value="PERMISSION">Access Permission Issue</option>
+                            <option value="VISITOR">Visitor Pass Problem</option>
+                            <option value="DEVICE">Device / Camera Hardware Issue</option>
+                            <option value="OTHER" selected>Other Issue</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small text-uppercase fw-semibold">Description</label>
+                        <textarea id="issueDescriptionText" class="form-control bg-white border text-dark" rows="3" placeholder="Describe the incident or technical problem..." required></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-warning py-2 fw-bold text-dark" onclick="submitIssueReport()">
+                            <i class="bi bi-send-fill me-1"></i> Submit Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         SCRIPTS: BOUNCER OPERATIONAL CONTROLLER
+         ======================================================== -->
+    <script>
+        // Operational State
+        let currentDirection = 'ENTRY';
+        let currentActiveGate = '{{ current_location.code|default:"GATE-MAIN" }}';
+        let html5QrScanner = null;
+        let faceVideoStream = null;
+        let scannedIdentityData = null;
+
+        // Navigation Switcher
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-pane-view').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
+
+            const targetPane = document.getElementById(tabId);
+            if (targetPane) targetPane.classList.add('active');
+
+            if (tabId === 'paneHome') document.getElementById('navItemHome')?.classList.add('active');
+            if (tabId === 'paneVisitors') document.getElementById('navItemVisitors')?.classList.add('active');
+            if (tabId === 'paneAlerts') document.getElementById('navItemAlerts')?.classList.add('active');
+            if (tabId === 'paneActivity') document.getElementById('navItemActivity')?.classList.add('active');
+            if (tabId === 'paneProfile') document.getElementById('navItemProfile')?.classList.add('active');
+        }
+
+        // Direction Toggle
+        function setDirectionMode(mode) {
+            currentDirection = mode;
+            const btnEntry = document.getElementById('btnModeEntry');
+            const btnExit = document.getElementById('btnModeExit');
+            const badge = document.getElementById('modalDirectionBadge');
+
+            if (mode === 'ENTRY') {
+                btnEntry.className = 'direction-pill-btn active-entry';
+                btnExit.className = 'direction-pill-btn';
+                if (badge) {
+                    badge.className = 'badge bg-success';
+                    badge.innerText = '[ ENTRY ]';
+                }
+            } else {
+                btnEntry.className = 'direction-pill-btn';
+                btnExit.className = 'direction-pill-btn active-exit';
+                if (badge) {
+                    badge.className = 'badge bg-warning text-dark';
+                    badge.innerText = '[ EXIT ]';
+                }
+            }
+        }
+
+
+        // ========================================================
+        // CORE SCANNER WORKFLOW (Sections 4, 5, 6, 7, 8, 9)
+        // ========================================================
+
+        function openScannerModal() {
+            setDirectionMode(currentDirection);
+            resetToScanBarcode();
+            const modal = new bootstrap.Modal(document.getElementById('scannerModal'));
+            modal.show();
+            startBarcodeCamera();
+        }
+
+        function closeScannerModal() {
+            stopBarcodeCamera();
+            stopFaceCamera();
+            const modalEl = document.getElementById('scannerModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        function resetToScanBarcode() {
+            stopFaceCamera();
+            document.getElementById('scanStageBarcode').style.display = 'block';
+            document.getElementById('scanStageIdentity').style.display = 'none';
+            document.getElementById('scanStageFace').style.display = 'none';
+            document.getElementById('scanStageGranted').style.display = 'none';
+            document.getElementById('scanStageDenied').style.display = 'none';
+            document.getElementById('scannerStepTitle').innerText = 'Step 1: Scan ID Card';
+        }
+
+        async function startBarcodeCamera() {
+            const qrFeed = document.getElementById('barcodeCameraFeed');
+            qrFeed.innerHTML = '';
+            document.getElementById('cameraPermissionError').style.display = 'none';
+
+            try {
+                html5QrScanner = new Html5Qrcode("barcodeCameraFeed");
+                const config = { fps: 15, qrbox: { width: 220, height: 220 } };
+
+                await html5QrScanner.start(
+                    { facingMode: "environment" },
+                    config,
+                    onBarcodeDecoded,
+                    (err) => { /* scanning */ }
+                );
+            } catch (err) {
+                console.warn('Camera failed:', err);
+                document.getElementById('cameraPermissionError').style.display = 'block';
+                document.getElementById('manualBarcodeRow').style.display = 'flex';
+            }
+        }
+
+        function stopBarcodeCamera() {
+            if (html5QrScanner) {
+                html5QrScanner.stop().catch(() => {}).finally(() => {
+                    html5QrScanner = null;
+                });
+            }
+        }
+
+        async function onBarcodeDecoded(decodedText) {
+            if (!decodedText) return;
+            stopBarcodeCamera();
+            lookupScannedBarcode(decodedText);
+        }
+
+        function toggleManualBarcodeRow() {
+            const row = document.getElementById('manualBarcodeRow');
+            row.style.display = (row.style.display === 'none') ? 'flex' : 'none';
+        }
+
+        function submitManualBarcode() {
+            const val = document.getElementById('manualBarcodeInput').value.trim();
+            if (val) {
+                stopBarcodeCamera();
+                lookupScannedBarcode(val);
+            }
+        }
+
+        // STEP 1 API CALL: Decode ID & Retrieve Minimal Identity
+        async function lookupScannedBarcode(code) {
+            try {
+                const resp = await fetch('/api/bouncer/scan-id/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ barcode: code, location_code: currentActiveGate })
+                });
+
+                const data = await resp.json();
+
+                if (!resp.ok || !data.valid) {
+                    showDeniedScreen({
+                        name: data.name || 'Unregistered Card',
+                        identifier: code,
+                        reason: data.failure_reason || data.error || 'Invalid ID Card',
+                        idStatus: data.status || 'INVALID',
+                        faceStatus: 'Bypassed'
+                    });
+                    return;
+                }
+
+                // Show Minimal Identity Found (Section 5)
+                scannedIdentityData = data;
+                displayMinimalIdentity(data);
+
+            } catch (e) {
+                showDeniedScreen({
+                    name: 'System Network Error',
+                    identifier: code,
+                    reason: 'Failed to connect to verification server. Fail-closed for security.',
+                    idStatus: 'ERROR',
+                    faceStatus: 'Offline'
+                });
+            }
+        }
+
+        function displayMinimalIdentity(data) {
+            document.getElementById('scanStageBarcode').style.display = 'none';
+            document.getElementById('scanStageIdentity').style.display = 'block';
+            document.getElementById('scannerStepTitle').innerText = 'Step 2: Cardholder Identity';
+
+            document.getElementById('idCardName').innerText = data.name;
+            document.getElementById('idCardIdentifier').innerText = data.identifier;
+            document.getElementById('idCardRoleBadge').innerText = data.role;
+            document.getElementById('idCardDept').innerText = data.department || '';
+            document.getElementById('idCardStatus').innerText = data.status || 'ACTIVE';
+            document.getElementById('idCardFaceStatus').innerText = data.face_status || 'NOT VERIFIED';
+
+            const photoEl = document.getElementById('idCardPhotoThumb');
+            photoEl.src = data.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=1E293B&color=fff`;
+        }
+
+        // STEP 2: Proceed to Face Verification (Section 6)
+        function proceedToFaceVerification() {
+            document.getElementById('scanStageIdentity').style.display = 'none';
+            document.getElementById('scanStageFace').style.display = 'block';
+            document.getElementById('scannerStepTitle').innerText = 'Step 3: Face Verification';
+
+            startFaceCamera();
+        }
+
+        async function startFaceCamera() {
+            const video = document.getElementById('faceVideoElement');
+            document.getElementById('faceSpinner').style.display = 'inline-block';
+            document.getElementById('faceMatchStatusText').innerText = 'Starting live camera...';
+
+            try {
+                faceVideoStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+                    audio: false
+                });
+                video.srcObject = faceVideoStream;
+                document.getElementById('faceSpinner').style.display = 'none';
+                document.getElementById('faceMatchStatusText').innerText = 'Face detected. Tap capture to verify.';
+            } catch (e) {
+                document.getElementById('faceSpinner').style.display = 'none';
+                document.getElementById('faceMatchStatusText').innerText = 'Camera error or busy.';
+            }
+        }
+
+        function stopFaceCamera() {
+            if (faceVideoStream) {
+                faceVideoStream.getTracks().forEach(t => t.stop());
+                faceVideoStream = null;
+            }
+        }
+
+        // STEP 3 API CALL: Capture & Run Dual-Authentication (Section 6 & 7)
+        async function captureAndVerifyFace() {
+            const video = document.getElementById('faceVideoElement');
+            const canvas = document.getElementById('faceCaptureCanvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+
+            // Mirror image on canvas to match mirrored selfie camera display
+            ctx.save();
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+
+            const liveFaceB64 = canvas.toDataURL('image/jpeg', 0.90);
+
+            document.getElementById('faceSpinner').style.display = 'inline-block';
+            document.getElementById('faceMatchStatusText').innerText = 'Detecting face & analyzing biometrics...';
+            document.getElementById('btnCaptureFace').disabled = true;
+
+            try {
+                const resp = await fetch('/api/bouncer/verify-access/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        barcode: scannedIdentityData.identifier,
+                        live_face: liveFaceB64,
+                        location_code: currentActiveGate,
+                        direction: currentDirection
+                    })
+                });
+
+                const data = await resp.json();
+                stopFaceCamera();
+
+                if (resp.ok && data.access_granted) {
+                    showGrantedScreen(data);
+                } else {
+                    showDeniedScreen({
+                        name: data.name || scannedIdentityData.name,
+                        identifier: scannedIdentityData.identifier,
+                        reason: data.failure_reason || data.error || 'Dual-Factor Verification Denied',
+                        idStatus: 'Verified ✓',
+                        faceStatus: data.face_matched ? 'Matched ✓' : 'Mismatch ✕'
+                    });
+                }
+            } catch (e) {
+                stopFaceCamera();
+                showDeniedScreen({
+                    name: scannedIdentityData.name,
+                    identifier: scannedIdentityData.identifier,
+                    reason: 'Verification service error or connection timeout.',
+                    idStatus: 'Error',
+                    faceStatus: 'Error'
+                });
+            } finally {
+                document.getElementById('btnCaptureFace').disabled = false;
+            }
+        }
+
+        function showGrantedScreen(data) {
+            document.getElementById('scanStageFace').style.display = 'none';
+            document.getElementById('scanStageGranted').style.display = 'block';
+            document.getElementById('scannerStepTitle').innerText = 'Access Decision';
+
+            document.getElementById('grantedName').innerText = data.name;
+            document.getElementById('grantedId').innerText = data.identifier;
+            document.getElementById('grantedLocation').innerText = data.location_name;
+            document.getElementById('grantedTime').innerText = `${data.direction} • ${data.timestamp}`;
+            document.getElementById('grantedSimilarity').innerText = `Matched ✓ (${data.similarity_score ? (data.similarity_score * 100).toFixed(0) + '%' : 'Confirmed'})`;
+
+            refreshStats();
+        }
+
+        function showDeniedScreen(info) {
+            document.getElementById('scanStageBarcode').style.display = 'none';
+            document.getElementById('scanStageIdentity').style.display = 'none';
+            document.getElementById('scanStageFace').style.display = 'none';
+            document.getElementById('scanStageDenied').style.display = 'block';
+            document.getElementById('scannerStepTitle').innerText = 'Access Decision';
+
+            document.getElementById('deniedReasonBadge').innerText = info.reason;
+            document.getElementById('deniedName').innerText = info.name;
+            document.getElementById('deniedId').innerText = info.identifier;
+            document.getElementById('deniedIdStatus').innerText = info.idStatus;
+            document.getElementById('deniedFaceStatus').innerText = info.faceStatus;
+            document.getElementById('deniedDetail').innerText = info.reason;
+
+            refreshStats();
+        }
+
+        function retryVerification() {
+            if (scannedIdentityData) {
+                displayMinimalIdentity(scannedIdentityData);
+            } else {
+                resetToScanBarcode();
+                startBarcodeCamera();
+            }
+        }
+
+        function confirmAndDoneScan() {
+            closeScannerModal();
+        }
+
+        function reportDeniedIssue() {
+            const reason = document.getElementById('deniedReasonBadge').innerText;
+            const cardId = document.getElementById('deniedId').innerText;
+            closeScannerModal();
+            openReportIssueModal(`Access Denied for ID ${cardId}: ${reason}`);
+        }
+
+        // ========================================================
+        // VISITOR REGISTRATION & CHECKOUT (Section 13, 14, 15, 16)
+        // ========================================================
+
+        function openVisitorEntryModal() {
+            document.getElementById('visitorRegistrationForm').reset();
+            document.getElementById('visitorRegistrationForm').style.display = 'block';
+            document.getElementById('visitorPassResult').style.display = 'none';
+            const modal = new bootstrap.Modal(document.getElementById('visitorEntryModal'));
+            modal.show();
+        }
+
+        async function submitVisitorRegistration(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitVisitor');
+            btn.disabled = true;
+            btn.innerText = 'Issuing pass...';
+
+            const payload = {
+                full_name: document.getElementById('visitorName').value,
+                phone: document.getElementById('visitorPhone').value,
+                purpose_of_visit: document.getElementById('visitorPurpose').value,
+                person_to_meet: document.getElementById('visitorHost').value,
+                organization: document.getElementById('visitorOrg').value,
+                location_code: currentActiveGate
+            };
+
+            try {
+                const resp = await fetch('/api/bouncer/visitors/register/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await resp.json();
+                if (resp.ok && data.success) {
+                    document.getElementById('visitorRegistrationForm').style.display = 'none';
+                    const resBox = document.getElementById('visitorPassResult');
+                    resBox.style.display = 'block';
+
+                    document.getElementById('issuedVisitorName').innerText = data.visitor.full_name;
+                    document.getElementById('issuedPassCode').innerText = data.pass.pass_code;
+
+                    try {
+                        JsBarcode("#issuedBarcodeCanvas", data.pass.pass_code, {
+                            format: "CODE128",
+                            lineColor: "#0F172A",
+                            background: "#F8FAFC",
+                            width: 2,
+                            height: 45,
+                            displayValue: false
+                        });
+                    } catch (barcodeErr) {}
+
+                    refreshStats();
+                    reloadVisitors();
+                } else {
+                    alert('Visitor Registration Error: ' + (data.error || 'Failed to register'));
+                }
+            } catch (err) {
+                alert('Connection error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> REGISTER & ISSUE PASS';
+            }
+        }
+
+        async function checkoutVisitor(visitorId, visitorName) {
+            if (!confirm(`Mark ${visitorName} as EXITED? This will deactivate their pass.`)) return;
+
+            try {
+                const resp = await fetch(`/api/bouncer/visitors/${visitorId}/checkout/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ location_code: currentActiveGate })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    const row = document.getElementById(`visitorRow${visitorId}`);
+                    if (row) row.remove();
+                    refreshStats();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function reloadVisitors() {
+            try {
+                const resp = await fetch('/api/bouncer/visitors/active/');
+                const data = await resp.json();
+                const container = document.getElementById('activeVisitorsList');
+                if (!data.visitors || data.visitors.length === 0) {
+                    container.innerHTML = '<div class="text-center py-5 text-muted"><i class="bi bi-people fs-1 text-secondary mb-2 d-block"></i>No active visitors currently on campus.</div>';
+                    return;
+                }
+                container.innerHTML = data.visitors.map(v => `
+                    <div class="card bg-white border p-3 rounded-3 shadow-sm" id="visitorRow${v.id}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex gap-3 align-items-center">
+                                ${v.photo_url ? `<img src="${v.photo_url}" class="rounded-2" style="width: 50px; height: 50px; object-fit: cover;">` : `<div class="bg-light border rounded-2 d-flex align-items-center justify-content-center text-secondary" style="width: 50px; height: 50px;"><i class="bi bi-person fs-3"></i></div>`}
+                                <div>
+                                    <div class="fw-bold text-dark fs-6">${v.full_name}</div>
+                                    <div class="text-muted small">${v.organization}</div>
+                                    <div class="text-primary small fw-semibold">Host: ${v.person_to_meet}</div>
+                                </div>
+                            </div>
+                            <span class="badge bg-success-subtle text-success small">Checked In</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light-subtle">
+                            <span class="text-muted small"><i class="bi bi-clock me-1"></i> ${v.entry_time}</span>
+                            <button type="button" class="btn btn-sm btn-outline-warning fw-semibold px-3" onclick="checkoutVisitor(${v.id}, '${v.full_name}')">
+                                <i class="bi bi-box-arrow-left me-1"></i> MARK EXIT
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {}
+        }
+
+        // ========================================================
+        // ALERTS & ASSISTANCE & ISSUES (Sections 17, 18, 19, 20)
+        // ========================================================
+
+        async function acknowledgeAlert(alertId) {
+            try {
+                const resp = await fetch(`/api/bouncer/alerts/${alertId}/acknowledge/`, { method: 'POST' });
+                const data = await resp.json();
+                if (data.success) {
+                    reloadAlerts();
+                    refreshStats();
+                }
+            } catch (e) {}
+        }
+
+        async function reloadAlerts() {
+            try {
+                const resp = await fetch('/api/bouncer/alerts/');
+                const data = await resp.json();
+                const container = document.getElementById('alertsListContainer');
+                if (!data.alerts || data.alerts.length === 0) {
+                    container.innerHTML = '<div class="text-center py-5 text-muted"><i class="bi bi-shield-check fs-1 text-success mb-2 d-block"></i>No open security alerts at this location.</div>';
+                    return;
+                }
+                container.innerHTML = data.alerts.map(a => `
+                    <div class="card bg-white border p-3 rounded-3 shadow-sm" id="alertCard${a.id}">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <span class="badge ${a.severity === 'CRITICAL' ? 'bg-danger text-white' : (a.severity === 'HIGH' ? 'bg-danger-subtle text-danger border border-danger' : 'bg-warning-subtle text-warning border border-warning')} small">
+                                ${a.alert_type}
+                            </span>
+                            <span class="text-muted small font-monospace">${a.time}</span>
+                        </div>
+                        <div class="text-dark small my-2">${a.description}</div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light-subtle">
+                            <span class="text-secondary small">Status: <strong>${a.status}</strong></span>
+                            <div class="d-flex gap-2">
+                                ${a.status !== 'RESOLVED' && a.status !== 'INVESTIGATING' ? `<button type="button" class="btn btn-sm btn-outline-info py-1 px-2 small" onclick="acknowledgeAlert(${a.id})"><i class="bi bi-check2 me-1"></i> ACKNOWLEDGE</button>` : ''}
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 small" onclick="openReportIssueModal('Alert #${a.id}: ${a.description}')"><i class="bi bi-flag me-1"></i> Report</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {}
+        }
+
+        function openReportIssueModal(prefillDesc = '') {
+            if (prefillDesc) {
+                document.getElementById('issueDescriptionText').value = prefillDesc;
+            } else {
+                document.getElementById('issueDescriptionText').value = '';
+            }
+            const modal = new bootstrap.Modal(document.getElementById('reportIssueModal'));
+            modal.show();
+        }
+
+        async function submitIssueReport() {
+            const desc = document.getElementById('issueDescriptionText').value.trim();
+            if (!desc) {
+                alert('Please enter an issue description.');
+                return;
+            }
+            const issueType = document.getElementById('issueTypeSelect').value;
+
+            try {
+                const resp = await fetch('/api/bouncer/issues/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        issue_type: issueType,
+                        description: desc,
+                        location_code: currentActiveGate
+                    })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    alert('Issue report submitted to campus supervisor.');
+                    bootstrap.Modal.getInstance(document.getElementById('reportIssueModal'))?.hide();
+                }
+            } catch (e) {
+                alert('Error submitting report.');
+            }
+        }
+
+        // ========================================================
+        // STATS & ACTIVITY REFRESH
+        // ========================================================
+
+        async function refreshStats() {
+            try {
+                const resp = await fetch('/api/bouncer/stats/');
+                const data = await resp.json();
+                document.getElementById('statTodayScans').innerText = data.today_scans;
+                document.getElementById('statTodayGranted').innerText = data.today_granted;
+                document.getElementById('statTodayDenied').innerText = data.today_denied;
+                document.getElementById('statActiveVisitors').innerText = data.active_visitors;
+                document.getElementById('statOpenAlerts').innerText = data.open_alerts;
+            } catch (e) {}
+        }
+
+        async function loadMyActivity(filterMode) {
+            document.getElementById('filterTodayBtn').className = (filterMode === 'today') ? 'btn btn-primary active' : 'btn btn-light border text-secondary';
+            document.getElementById('filterShiftBtn').className = (filterMode === 'shift') ? 'btn btn-primary active' : 'btn btn-light border text-secondary';
+
+            try {
+                const resp = await fetch(`/api/bouncer/my-activity/?filter=${filterMode}`);
+                const data = await resp.json();
+                const container = document.getElementById('myActivityContainer');
+                if (!data.activity || data.activity.length === 0) {
+                    container.innerHTML = '<div class="text-center py-5 text-muted"><i class="bi bi-clock-history fs-1 text-secondary mb-2 d-block"></i>No verifications recorded on this shift yet.</div>';
+                    return;
+                }
+                container.innerHTML = data.activity.map(l => `
+                    <div class="card bg-white border p-2 px-3 rounded-3 shadow-sm d-flex flex-row justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3">
+                            ${l.decision === 'GRANTED' ? '<i class="bi bi-check-circle-fill text-success fs-4"></i>' : '<i class="bi bi-x-circle-fill text-danger fs-4"></i>'}
+                            <div>
+                                <div class="fw-bold text-dark small">${l.name}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">
+                                    <span class="badge bg-secondary font-monospace">${l.direction}</span>
+                                    <span class="ms-1">${l.identifier}</span>
+                                    ${l.failure_reason ? `<span class="text-danger ms-1">• ${l.failure_reason}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-secondary small font-monospace">${l.time}</span>
+                    </div>
+                `).join('');
+            } catch (e) {}
+        }
+
+        function openManualCodeModal() {
+            openScannerModal();
+            toggleManualBarcodeRow();
+        }
+
+        // Auto refresh stats every 30 seconds
+        setInterval(refreshStats, 30000);
+    </script>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
